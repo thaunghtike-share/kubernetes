@@ -48,3 +48,4 @@ $ kubectl rollout history deploy/name နဲ့ revision ကြည့်တာ d
 $ kubectl rollout undo deploy/name --to-revision=revision_id (roll back တာ)
 </pre>
 
+
