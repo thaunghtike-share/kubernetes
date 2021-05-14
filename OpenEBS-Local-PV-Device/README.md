@@ -59,6 +59,10 @@ blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaime
 blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   10m
 blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   10m
 </pre>
+Create StorageClass
+<pre>
+$ kubectl apply -f local-sc.yml
+</pre>
 
 
 
