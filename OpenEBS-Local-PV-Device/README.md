@@ -43,7 +43,23 @@ openebs-validation-webhook-cfg   1          2m11s
 $ kubectl edit validatingwebhookconfigurations openebs-validation-webhook-cfg
 change failurePolicay: fail to Ignore
 </pre>
-Now, maya-apiserver is ready state
+Now, maya-apiserver is ready state. OpenEbs create alot of crds like blockdevice, blockdeviceclaims
+<pre>
+$ kubectl get crds -n openebs
+</pre>
+Next step is to check your blockdevice list on all nodes. I have two blockdevice (or) EBS on one worker node. So, I have total 6 blockdevices.
+<pre>
+$ kubectl get blockdevices -n openebs
+
+NAME                                           NODENAME   SIZE          CLAIMSTATE   STATUS   AGE
+blockdevice-6d3e3db0a98b20d4a25714f1847e85da   kworker1   17177772032   Unclaimed    Active   10m
+blockdevice-78e696e868b087cd8fdeea5756e7b0f6   kworker2   53687091200   Unclaimed    Active   10m
+blockdevice-81748aa4bb4f9d0d8a5473f91f1a8ab3   kworker1   53687091200   Unclaimed    Active   10m
+blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaimed    Active   10m
+blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   10m
+blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   10m
+</pre>
+
 
 
 
