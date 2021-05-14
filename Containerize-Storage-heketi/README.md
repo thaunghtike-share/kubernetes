@@ -119,3 +119,4 @@ $ kubectl scale deploy nginx-deployment --replicas=5
 * One of worker nodes downed, but you can access the nginx pod because nginx pod's index.html file is replicated to all worker nodes ( /var/lib/kubelet) . Check your pvc.yaml file and you will see 'volumetype: replicate:3'
 
 * Thank You!
+
