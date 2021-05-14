@@ -1,0 +1,65 @@
+{
+  "clusters": [
+    {
+      "nodes": [
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "kworker1"
+              ],
+              "storage": [
+                "172.16.0.58"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            {
+              "name": "/dev/xvdf",
+              "destroydata": false
+            }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "kworker2"
+              ],
+              "storage": [
+                "172.16.0.174"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            {
+              "name": "/dev/xvdf",
+              "destroydata": false
+            }
+          ]
+        },
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "kworker3"
+              ],
+              "storage": [
+                "172.16.0.161"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            {
+              "name": "/dev/xvdf",
+              "destroydata": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
