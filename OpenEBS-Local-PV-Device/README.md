@@ -59,7 +59,7 @@ blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaime
 blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   10m
 blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   10m
 </pre>
-Create StorageClass. FsType: ext4 means pvc will consider ext4 blockdevice ( to store pod data). OpenEbs has local-pv-provisioner pod. So, we don't need to create pv manually. Blockdevice look like nfs-server mountpath to mount pod data. In nfs, we create PV ( server and path ). If we don't create storageclass manually, openebs will use default openebs-device sc .
+Create StorageClass. FsType: ext4 means one of ext4 blockdevice will consider to pv storage randomly ( to store pod data). OpenEbs has local-pv-provisioner pod. So, we don't need to create pv manually. Blockdevice look like nfs-server mountpath to mount pod data. In nfs, we create PV ( server and path ). If we don't create storageclass manually, openebs will use default openebs-device sc .
 <pre>
 $ kubectl apply -f local-sc.yml
 </pre>
@@ -89,7 +89,20 @@ $ kubectl get pvc
 NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 local-device-pvc   Bound    pvc-a1e98cea-1b4a-4ce7-9453-c15a50081974   5G         RWO            local-device   9m46s
 </pre>
+Check back to blockdevices. One of them is claimed by pvc. ( if you want to use specific blockdevice, you should label to block device. Read more on official docs under Local PV Device )
+<pre>
+$ kubectl get blockdevices -n openebs
 
+NAME                                           NODENAME   SIZE          CLAIMSTATE   STATUS   AGE
+blockdevice-6d3e3db0a98b20d4a25714f1847e85da   kworker1   17177772032   Unclaimed    Active   44m
+blockdevice-78e696e868b087cd8fdeea5756e7b0f6   kworker2   53687091200   Claimed      Active   44m
+blockdevice-81748aa4bb4f9d0d8a5473f91f1a8ab3   kworker1   53687091200   Unclaimed    Active   44m
+blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaimed    Active   44m
+blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   44m
+blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   44m
+</pre>
+You have created green.txt file inside the pods under /mnt/store. Pod is deployed on worker2. So, check blockdevice which has 50Gb storage on your worker2 node. Persistent data will be stored under device mount path.
 
+Thanks!
 
 
