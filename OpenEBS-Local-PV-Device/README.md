@@ -7,6 +7,7 @@ Prerequisites
 </pre>
 Check Your Kubernetes Cluster
 <pre>
+$ kubectl get nodes -o wide
 NAME       STATUS   ROLES    AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
 kmaster    Ready    master   3m7s   v1.18.5   10.0.0.6      <none>        Ubuntu 18.04.5 LTS   5.4.0-1047-azure   docker://20.10.6
 kworker1   Ready      none   84s    v1.18.5   10.0.0.8      <none>        Ubuntu 18.04.5 LTS   5.4.0-1047-azure   docker://20.10.6
