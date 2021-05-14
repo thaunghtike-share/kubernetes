@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-demo
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-red
+  namespace: nginx-demo
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: red.nginx.example.com 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-deploy-red
+          servicePort: 80
+        
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx-red
+  name: nginx-deploy-red
+  namespace: nginx-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: nginx-red
+  template:
+    metadata:
+      labels:
+        run: nginx-red
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<h1>I am <font color=blue>RED</font></h1>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-deploy-red
+  namespace: nginx-demo
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    run: nginx-red
+
