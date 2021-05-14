@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-blue
+  namespace: nginx-demo
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: blue.nginx.example.com 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-deploy-blue
+          servicePort: 80
+
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-deploy-blue
+  namespace: nginx-demo
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    run: nginx-blue
+
