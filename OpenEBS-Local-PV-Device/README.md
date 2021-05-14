@@ -33,6 +33,17 @@ openebs-ndm-pbn5z                              1/1     Running   0          62s
 openebs-provisioner-d595ccf4c-8wlc5            1/1     Running   0          63s
 openebs-snapshot-operator-7b996dd9c7-jks7g     2/2     Running   0          62s
 </pre>
+As you see, maya-api pod is not ready. so you have to fix it.
+<pre>
+$ kubectl get validatingwebhookconfigurations
+
+NAME                             WEBHOOKS   AGE
+openebs-validation-webhook-cfg   1          2m11s
+
+$ kubectl edit validatingwebhookconfigurations openebs-validation-webhook-cfg
+change failurePolicay: fail to Ignore
+</pre>
+Now, maya-apiserver is ready state
 
 
 
