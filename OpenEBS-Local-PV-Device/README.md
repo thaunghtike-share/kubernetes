@@ -3,7 +3,7 @@
 Prerequisites
 <pre>
 - kubernetes cluster
-- For provisioning Local PV using the block devices, the Kubernetes nodes should have block devices attached to the nodes. The block devices can optionally be formatted and mounted.
+- For provisioning Local PV using the block devices, the Kubernetes nodes should have block devices attached to the nodes. The block devices can be formatted with ext4 and mounted. Not LVM . 
 </pre>
 Check Your Kubernetes Cluster
 <pre>
@@ -101,7 +101,9 @@ blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaime
 blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   44m
 blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   44m
 </pre>
+<pre>
 You have created green.txt file inside the pods under /mnt/store. Pod is deployed on worker2. So, check blockdevice which has 50Gb storage on your worker2 node. Persistent data will be stored under device mount path.
+</pre>
 
 Thanks!
 
