@@ -59,7 +59,9 @@ blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaime
 blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   10m
 blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   10m
 </pre>
+<pre>
 Create StorageClass. FsType: ext4 means one of ext4 blockdevice will consider to pv storage randomly ( to store pod data). OpenEbs has local-pv-provisioner pod. So, we don't need to create pv manually. Blockdevice look like nfs-server mountpath to mount pod data. In nfs, we create PV ( server and path ). If we don't create storageclass manually, openebs will use default openebs-device sc .
+</pre>
 <pre>
 StorageClass: manual ဖြစ်တဲ့ hostpath နဲ့ nfs မှာ path ကို pv မှာထည့်တာ openebs မှာကျ pv က pod အနေ နဲ့ run ထားတာဒါကြောင့် local pv hostpath ဆို path ကို storageclass ဆောက်ပြီး ထည့်တာ
 local pv device မှာကျ ဘယ်blockdevice ကို သုံးမှာလည်းဆိုတာကို storageclass မှာထည့်ပေးတာ)
