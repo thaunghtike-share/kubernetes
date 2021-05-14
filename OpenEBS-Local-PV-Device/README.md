@@ -59,9 +59,35 @@ blockdevice-881899459b7dd2652548a28b583563cb   kworker2   17177772032   Unclaime
 blockdevice-c6eb6cf33856a4cb113a43484028735e   kworker3   4292870144    Unclaimed    Active   10m
 blockdevice-dec1b1548fe335d7b792630d5320ce20   kworker3   53687091200   Unclaimed    Active   10m
 </pre>
-Create StorageClass
+Create StorageClass. FsType: ext4 means pvc will consider ext4 blockdevice ( to store pod data). OpenEbs has local-pv-provisioner pod. So, we don't need to create pv manually. Blockdevice look like nfs-server mountpath to mount pod data. In nfs, we create PV ( server and path ). If we don't create storageclass manually, openebs will use default openebs-device sc .
 <pre>
 $ kubectl apply -f local-sc.yml
+</pre>
+Create pvc. 
+<pre>
+$ kubectl apply -f local-pvc.yml
+$ kubectl get pvc
+
+NAME               STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+local-device-pvc   Pending                                      local-device   36s
+</pre>
+<pre>
+The output shows that the STATUS is Pending. This means PVC has not yet been used by an application pod. The next step is to create a Pod that uses your PersistentVolumeClaim as a volume. ( By default,volumeBindingMode is Immediate, pvc will be in boundng state, since we set volumeBindingMode: waitForFirstConsumer, pvc will bound to pv after creating pod).
+</pre>
+Final Step is to deploy pod
+<pre>
+$ kubectl apply -f pod.yml
+$ kubectl get pods -o wide
+
+NAME                     READY   STATUS    RESTARTS   AGE   IP               NODE       NOMINATED NODE   READINESS GATES
+hello-local-device-pod   1/1     Running   0          82s   192.168.77.131   kworker2   <none>           <none>
+</pre>
+After creating pod successfully, pvc change mode to bound state.
+<pre>
+$ kubectl get pvc
+
+NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+local-device-pvc   Bound    pvc-a1e98cea-1b4a-4ce7-9453-c15a50081974   5G         RWO            local-device   9m46s
 </pre>
 
 
