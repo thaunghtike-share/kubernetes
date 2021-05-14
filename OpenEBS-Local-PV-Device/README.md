@@ -1,6 +1,6 @@
 # OpenEBS Local PV Device
 
-* Prerequisites
+Prerequisites
 <pre>
 - kubernetes cluster
 
