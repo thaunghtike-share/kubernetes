@@ -1,6 +1,6 @@
 Download kube.sh file on all nodes ( including master)
 <pre>
-$ wget 
+$ wget https://github.com/tho861998/kubernetes/blob/main/Cluster-Setup/kube.sh
 $ chmod +x kube.sh
 $ ./kube.sh
 </pre>
