@@ -15,7 +15,7 @@ $  kubectl get deployments -n kubernetes-dashboard
 </pre>
 First, we will create a service account manifest file in which we will define the administrative user for kube-admin and the associated namespace they have access to.
 <pre>
-$ wget
+$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/admin-sa.yml
 $ kubectl apply -f admin-sa.yml
 </pre>
 Next, we will bind the cluster-admin role to the created user.
