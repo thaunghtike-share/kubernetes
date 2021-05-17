@@ -6,7 +6,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0
 </pre>
 Now, we deploy dashboard service
 <pre>
-$ wget 
+$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/kubernetes-dashboard-deployment.yml
 $ kubectl apply -f kubernetes-dashboard-deployment.yml
 </pre>
 Now we will check the Dashboard's creation and deployment status using this command.
