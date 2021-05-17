@@ -20,7 +20,7 @@ $ kubectl apply -f admin-sa.yml
 </pre>
 Next, we will bind the cluster-admin role to the created user.
 <pre>
-$ wget
+$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/admin-rbac.yml
 $ kubectl apply -f admin-rbac.yml
 </pre>
 In this step, we store the specific name of the service account.
