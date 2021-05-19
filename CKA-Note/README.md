@@ -55,13 +55,18 @@ $ kubernetes မှာကျ command နဲ့ args ဖြစ်သွားတ�
 Configmap ( cm )
 <pre>
 cm ကို yaml file နဲ့လည်းadd ရတယ် kubectl create cm name --from-literal / --from-file ကနေလည်းထည့်ရတယ် 
+cm ကို pod ထဲမှာထည့်
 </pre>
 Env Kubernetes
 <pre>
 env var တွေကို name/value , envFrom - configMapRef/secretRef နဲ့လည်းထည့်လို့ရ
+valueFrom က ရှိပြီးသား cm , secret တွေကနေ key ကိုထည့်တာ
 </pre>
 Secrets Kubernetes
 <pre>
 secret ကိုလည်း cm နည်းတူ generic --from-literal (OR) --from-path ကနေ ထည့်လို့ရတယ် secret မှာ type တွေရှိတယ် generic (opaque) , sa-token, tls ,docker-cfg 
+</pre>
+<pre>
+cm | secret တွေကို အပေါက env variable အနေနဲ့ pod ထဲထည့်တာ cm | secret တွေကို volume အနေနဲ့ mount ပြီးထည့်လို့ရတယ် pvc mount သလိုပဲ container မှာ volume path လုပ်တယ် ပြီးရင် volume ဆောက်တယ် pvc နေရာ cm | secret ပြောင်းသွားတာပဲကွာတယ် )
 </pre>
 
