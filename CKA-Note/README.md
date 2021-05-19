@@ -69,4 +69,8 @@ secret ကိုလည်း cm နည်းတူ generic --from-literal (OR) -
 <pre>
 cm | secret တွေကို အပေါက env variable အနေနဲ့ pod ထဲထည့်တာ cm | secret တွေကို volume အနေနဲ့ mount ပြီးထည့်လို့ရတယ် pvc mount သလိုပဲ container မှာ volume path လုပ်တယ် ပြီးရင် volume ဆောက်တယ် pvc နေရာ cm | secret ပြောင်းသွားတာပဲကွာတယ် )
 </pre>
-
+Probe ( Liveness and Readiness )
+<pre>
+liveness ဆိုတာ က container healthy ဖြစ်မဖြစ်ကိုစစ်တာ http,tcp,exec 3ခုနဲ့ စစ်လို့ရ liveness ထဲက error မတက်ရင် container က healthy ဖြစ်တယ် error တက်ရင် liveness probe failed error ပြ kubelet က container ကို restart ပြန်လုပ် 
+readiness ဆိုတာက readiness ထဲက http,tcp,exc 3ခုထဲက တစ်ခုနဲ့စစ်လို့ error မတက်ရင် pod status မှာ ready 1/1 2/2 ပြတယ် error ပါရင် pod status မှာ 0/1 0/2 readiness probe failed ဆိုပြတယ် 
+</pre>
