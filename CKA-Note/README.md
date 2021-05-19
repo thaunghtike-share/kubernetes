@@ -50,7 +50,7 @@ $ kubectl rollout undo deploy/name --to-revision=revision_id (roll back တာ)
 Command and Args in kubernetes
 <pre>
 $ Docker မှာ Entrypoint နဲ့ CMD ကို Dockerfile မှာထည့်ရေးတာ eg . CMD ["sleep", "5"] / Entrypoint က CMD နဲ့တွဲသုံးတာ eg. Entrypoint ["bin/bash", "-c"] CMD ["ls"]
-$ kubernetes မှာကျ command နဲ့ args ဖြစ်သွားတာ Docker က EP က command နဲ့တူပြီး CMD က args နဲ့တူတယ် Dockerfile ထဲက EP နဲ့ CMD ကို kubernetes yaml fileတွေမှာ overwrite ချင်ရင် command and args မှာ ပြန်ပြင်ရတယ် Dockerfile မှာ Entrypoint ["sleep"] CMD ["5"] ထည့်ပြီးထုတ်လိုက်တဲ့ image ကို Pod အနေနဲ့ sleep 10ထားမယ်ဆို yaml fileမှာ args ["10"] ကိုထည့်ရမယ် Sleep က image ဆောက်ထဲက Entrypoint ပါလာပြီးသား  command ["sleep"]က ထပ်ထည့်လည်းရ မထည့်လည်းရ ( Docker EP = Kubernetes command ); You can also inject shell scripts inside Pod yaml with commands.
+$ kubernetes မှာကျ command နဲ့ args ဖြစ်သွားတာ Docker က EP က command နဲ့တူပြီး CMD က args နဲ့တူတယ် Dockerfile ထဲက EP နဲ့ CMD ကို kubernetes yaml fileတွေမှာ overwrite ချင်ရင် command and args မှာ ပြန်ပြင်ရတယ် Dockerfile မှာ Entrypoint ["sleep"] CMD ["5"] ထည့်ပြီးထုတ်လိုက်တဲ့ image ကို Pod အနေနဲ့ sleep 10ထားမယ်ဆို yaml fileမှာ args ["10"] ကိုထည့်ရမယ် Sleep က image ဆောက်ထဲက Entrypoint ပါလာပြီးသား  command ["sleep"]က ထပ်ထည့်လည်းရ မထည့်လည်းရ ( Docker EP = Kubernetes command ); You can also inject shell scripts inside Pod yaml with commands. /bin/bash ပါရင် commandမှာ "" မလိုဘူး /bin/bash /bin/sh မပါရင်ကျ busybox က မသိဘူး cmd ကို ဒါကြောင့် "" string ဖြစ်အောင်ထည့်ရတာ eg. /bin/sh -c sleep 10 && "sleep","5"
 </pre>
 Configmap ( cm )
 <pre>
