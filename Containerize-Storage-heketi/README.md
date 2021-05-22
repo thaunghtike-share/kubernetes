@@ -6,6 +6,7 @@ https://github.com/tho861998/kubernetes/Cluster-Setup/README.md
 Clone git repo
 <pre>
 git clone https://github.com/tho861998/kubernetes.git
+cd kubernetes/Containerize-Storage-heketi/
 </pre>
 * Each node that will be running gluster needs at least one raw block device. This block device will be made into an LVM PV and fully managed by Heketi. For typical installs at least three nodes will need to be provisioned. Extra small clusters can be configured with just one node. The three Kubernetes nodes intended to run the GlusterFS Pods must have the appropriate ports opened for GlusterFS communication. Run the following commands on each of the nodes.
 <pre>
@@ -19,12 +20,12 @@ service iptables save
 * Deploy gluster container onto a specified node by setting the label storagenode=glusterfs on that node.
 <pre>
 $ kubectl label node <...node...> storagenode=glusterfs
-$ kubectl apply -f glusterfs-daemonset.json ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/glusterfs-daemonset.json )
+$ kubectl apply -f glusterfs-daemonset.json 
 $ kubectl get pods -o wide ( check glusterfs pods are running or not )
 </pre>
 * Next we will create a service account for Heketi:
 <pre>
-$ kubectl apply -f heketi-sa.json ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/heketi-sa.json )
+$ kubectl apply -f heketi-sa.json 
 </pre>
 * We must now establish the ability for that service account to control the gluster pods. We do this by creating a cluster role binding for our newly created service account.
 <pre>
@@ -32,11 +33,11 @@ $ kubectl create clusterrolebinding heketi-gluster-admin --clusterrole=edit --se
 </pre>
 * Now we need to create a Kubernetes secret that will hold the configuration of our Heketi instance. The configuration file must be set to use the kubernetes executor in order for the Heketi server to control the gluster pods
 <pre>
-$ kubectl create secret generic heketi-config-secret --from-file=./heketi.json ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/heketi.json )
+$ kubectl create secret generic heketi-config-secret --from-file=./heketi.json
 </pre>
 * Next we need to deploy an initial Heketi Pod and a Service to access that pod. ( * Notice that you are using heketi/heketi:9 image* )
 <pre>
-$ kubectl apply -f heketi-deploy.json ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/heketi-deploy.json )
+$ kubectl apply -f heketi-deploy.json 
 </pre>
 * Submit the file and verify everything is running properly as demonstrated below:
 <pre>
@@ -53,7 +54,7 @@ tar xzvf heketi*
 * After that, you will attach a LVM storage device on each node. (pvcreate /dev/xvdg ) *
 * Next we are going to provide Heketi with information about the GlusterFS cluster it is to manage. We provide this information via a topology file. It will create a heketi-cluster inside heketi pod.
 <pre>
-heketi-client/bin/heketi-cli topology load --json=topology-sample.json ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/topology-sample.json )
+heketi-client/bin/heketi-cli topology load --json=topology-sample.json
 </pre>
 <pre>
 Found node ip-172-20-0-217.ec2.internal on cluster e6c063ba398f8e9c88a6ed720dc07dd2
@@ -76,13 +77,13 @@ Run `lvcreate --help' for more information. )
 
 * Create a storageclass for dynamic storage provisioner
 <pre>
-$ kubectl apply -f storageclass.yaml (https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/storageclass.yaml )
+$ kubectl apply -f storageclass.yaml
 </pre>
 * NOTE: Restuser and restuserkey can be anything since authorization is turned off ( inside heketi.json )
 
 * Create a pvc
 <pre>
-$ kubectl apply -f pvc.yaml ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/pvc.yaml )
+$ kubectl apply -f pvc.yaml 
 </pre>
 * Notice, that the PVC is bound to a dynamically created volume. We can also view the Volume (PV):
 <pre>
@@ -90,7 +91,7 @@ kubectl get pv
 </pre>
 * Finally, run a deployment by using created pvc
 <pre>
-$ kubectl apply -f deployment.yaml ( https://github.com/tho861998/containerize-storage-kubernetes-heketi/blob/main/deployment.yaml )
+$ kubectl apply -f deployment.yaml
 </pre>
 
 * Now we will exec into the container and create an index.html file
