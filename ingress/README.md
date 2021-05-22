@@ -1,6 +1,16 @@
 # kube-ingress
 
-* Firstly,create a kubernetes cluster with kubeadm ( one master and two worker nodes) and Clone my github repo
+* Firstly,create a kubernetes cluster with kubeadm ( one master and two worker nodes) and 
+To install nginx ingress. create a private repo in your docker hub name nginx-ingress
+<pre>
+$ docker login
+$ git clone https://github.com/nginxinc/kubernetes-ingress/
+$ cd kubernetes-ingress/
+$ git checkout v1.11.2
+$ apt install make
+$ make debian-image PREFIX=tho861998/nginx-ingress TARGET=container ( here tho861998 is my docker hub username )
+$ make push PREFIX=tho861998/nginx-ingress
+* Clone my github repo
 <pre>
 $ git clone https://github.com/tho861998/kubernetes.git
 $ cd kubernetes/ingress/
