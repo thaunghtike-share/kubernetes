@@ -16,3 +16,5 @@ $ kubectl apply -f ingress.yml
 </pre>
 we can use nginx as LB instead of haproxy
 Add LB ip in /etc/hosts
+
+If ingress doesn't work actually, degrade cluster version ( ingress apiVersion: extensions/v1 or extensions/v1beta1 )
