@@ -14,6 +14,11 @@ kworker1   Ready      none   84s    v1.18.5   10.0.0.8      <none>        Ubuntu
 kworker2   Ready      none   93s    v1.18.5   10.0.0.7      <none>        Ubuntu 18.04.5 LTS   5.4.0-1047-azure   docker://20.10.6
 kworker3   Ready      none   91s    v1.18.5   10.0.0.9      <none>        Ubuntu 18.04.5 LTS   5.4.0-1047-azure   docker://20.10.6
 </pre>
+Clone my github repo
+<pre>
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/OpenEBS-Local-Device/
+</pre>
 Install OpenEBS on your cluster using kubectl
 <pre>
 $ kubectl apply -f https://openebs.github.io/charts/openebs-operator.yaml
