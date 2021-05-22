@@ -1,7 +1,7 @@
 # ingress-cert-manager
 Firstly deploy nginx ingress.All resources (the CustomResourceDefinitions, cert-manager, namespace, and the webhook component) are included in a single YAML manifest file:
 <pre>
-$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
+$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml
 $ kubectl get all -n cert-manager #check if cert-manger three pods are running 
 </pre>
 <pre>
