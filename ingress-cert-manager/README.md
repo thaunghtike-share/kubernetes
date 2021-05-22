@@ -1,5 +1,5 @@
-# ingress-cert-manager
-Firstly deploy nginx ingress.All resources (the CustomResourceDefinitions, cert-manager, namespace, and the webhook component) are included in a single YAML manifest file:
+# ingress-cert-manager 
+Firstly deploy nginx ingress.All resources (the CustomResourceDefinitions, cert-manager, namespace, and the webhook component) are included in a single YAML manifest file: Acutally, it doesn't work on kube version 1.20.0 . ( use 1.17 1.16 )
 Option1: Let's Encrypt
 <pre>
 $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.4.0-alpha.1/cert-manager.crds.yaml
