@@ -62,7 +62,7 @@ kubectl apply -f gateway.yaml
 kubectl apply -f virtual-service.yaml
 </pre>
 * Monitor this web app using grafana and kiali
-* Test mydata v1 and v2 by splitting traffic with kiali
+* Test mydata v1 and v2 by splitting traffic with kiali (or) configuration
 
 * access myweb app from istion ingress-gateway external ip
 <pre>
