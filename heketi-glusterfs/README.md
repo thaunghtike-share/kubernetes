@@ -20,11 +20,13 @@ Kworker3 - heketi
 </pre>
 * this is how I deploy my kube cluster...
 <pre>
-https://github.com/tho861998/heketi-glusterfs/blob/main/cluster.txt
+https://github.com/tho861998/kubernetes/Cluster-Setup/README.md
 </pre>
-* after cluster creating, i will setup two glusterfs servers and one heketi machine.
+* after cluster creating, i will setup two glusterfs servers and one heketi machine. clone my github repo
 <pre>
-https://github.com/tho861998/heketi-glusterfs/blob/main/heketi-setup.txt
+$ https://github.com/tho861998/kubernets/heketi-glusterfs/heketi-setup.txt
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/heketi-glusterfs/
 </pre>
 * ( In this step, make sure that you need to add all worker nodes ip to /etc/hosts on heketi
 <pre>
@@ -71,8 +73,7 @@ you will get node ip after adding each node to heketi cluster
 
 Firstly , you have to create a storageclass for heketi. So, run 'kubectl apply -f storage-class-glusterfs.yaml' on master node
 
-https://github.com/tho861998/heketi-glusterfs/blob/main/storage-class-glusterfs.yaml
-
+$ kubectl apply -f storage-class-glusterfs.yaml
 Provisioner   --> glusterfs
 resturl       --> heketi server curl
 restuser      --> your heketi user
@@ -84,14 +85,14 @@ replicas2     --> this is required to replicate your pod data to both glusterfs 
 
 * Notice that you must install glusterfs-client tool on all worker nodes. When you deploy pod , glusterfs-client will help you to mount pvc that is using heketi server on each worker node
 <pre>
-https://github.com/tho861998/heketi-glusterfs/blob/main/pvc-glusterfs.yaml
+$ kubectl apply -f pvc-glusterfs.yaml
 
 accessMode - RWX
 capactiy   - 2Gi
 </pre>
 * Final Step is to run deployment 
 <pre>
-https://github.com/tho861998/heketi-glusterfs/blob/main/deployment.yaml
+$ kubectl apply -f deployment.yaml
 </pre>
 * After creating pods , expose service deployment as NodePort
 <pre>
