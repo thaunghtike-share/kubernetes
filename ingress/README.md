@@ -75,4 +75,7 @@ backend http_back
 * kubectl apply -f nginx-svc-ingress-green.yaml
 </pre>
 * Don't forget to add haproxy ip in /etc/hosts of each node .
-
+Note
+<pre>
+If u don't want to load haproxy, expose ingress as nodeport type=LB
+</pr>
