@@ -11,11 +11,8 @@ $ kubectl get all -n cert-manager #check if cert-manger three pods are running
 <pre>
 $ git clone https://github.com/tho861998/kubernetes.git
 $ cd kubernetes/ingress-cert-manager
-$ kubectl apply -f cert.yaml #if you get error , run below commands (internal Server Error) #if you got no error, don't delete 2 resource
-$ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-manager-webhook
-$ kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook
 $ kubectl apply -f dep.yml
-$ kubectl apply -f haproxy.cfg
+$ kubectl apply -f ingress.yml
 </pre>
 we can use nginx as LB instead of haproxy
 Add LB ip in /etc/hosts
