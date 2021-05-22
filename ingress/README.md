@@ -10,6 +10,7 @@ git checkout v1.11.2
 apt install make
 make debian-image PREFIX=tho861998/nginx-ingress TARGET=container ( here tho861998 is my docker hub username )
 make push PREFIX=tho861998/nginx-ingress
+cd deployments
 kubectl apply -f common/ns-and-sa.yaml
 kubectl apply -f rbac/rbac.yaml
 kubectl apply -f common/default-server-secret.yaml
