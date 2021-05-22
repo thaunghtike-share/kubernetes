@@ -33,26 +33,7 @@ Get Access to the Ingress Controller
 <pre>
 If you created a daemonset, ports 80 and 443 of the Ingress controller container are mapped to the same ports of the node where the container is running. To access the Ingress controller, use those ports and an IP address of any node of the cluster where the Ingress controller is running.
 </pre>
-Loadbalaning with nginx (option 1 ). 10.0.0.5 and 6 are worker nodes ip on which nginx-controller is running.
-<pre>
-apt install nginx -n ( on master node)
-vim /etc/nginx/sites-available/default
-
-upstream myapp1 {
-        server 10.0.0.5;
-        server 10.0.0.6;
-    }
-
-    server {
-        listen 80;
-
-        location / {
-            proxy_pass http://myapp1;
-        }
-}
-Then add your LB (master node )ip in /etc/hosts with domain name you want to use for apps
-</pre>
-* Option 2: LoadBalancing with Haproxy .create a haproxy LB with centos vm 
+LoadBalancing with Haproxy .create a haproxy LB with centos vm 
 * vim /etc/haproxy/haproxy.cfg
 <pre>
 
