@@ -29,11 +29,6 @@ kubectl apply -f common/crds/appprotect.f5.com_apusersigs.yaml
 kubectl apply -f daemon-set/nginx-ingress.yaml
 kubectl get pods -n nginx-ingress
 </pre>
-* Clone my github repo
-<pre>
-$ git clone https://github.com/tho861998/kubernetes.git
-$ cd kubernetes/ingress/
-</pre>
 Get Access to the Ingress Controller
 <pre>
 If you created a daemonset, ports 80 and 443 of the Ingress controller container are mapped to the same ports of the node where the container is running. To access the Ingress controller, use those ports and an IP address of any node of the cluster where the Ingress controller is running.
