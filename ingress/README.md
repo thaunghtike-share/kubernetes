@@ -3,25 +3,60 @@
 * Firstly,create a kubernetes cluster with kubeadm ( one master and two worker nodes) and 
 To install nginx ingress. create a private repo in your docker hub name nginx-ingress
 <pre>
-$ docker login
-$ git clone https://github.com/nginxinc/kubernetes-ingress/
-$ cd kubernetes-ingress/
-$ git checkout v1.11.2
-$ apt install make
-$ make debian-image PREFIX=tho861998/nginx-ingress TARGET=container ( here tho861998 is my docker hub username )
-$ make push PREFIX=tho861998/nginx-ingress
+docker login
+git clone https://github.com/nginxinc/kubernetes-ingress/
+cd kubernetes-ingress/
+git checkout v1.11.2
+apt install make
+make debian-image PREFIX=tho861998/nginx-ingress TARGET=container ( here tho861998 is my docker hub username )
+make push PREFIX=tho861998/nginx-ingress
+kubectl apply -f common/ns-and-sa.yaml
+kubectl apply -f rbac/rbac.yaml
+kubectl apply -f common/default-server-secret.yaml
+kubectl apply -f common/nginx-config.yaml
+kubectl apply -f rbac/ap-rbac.yaml
+kubectl apply -f common/ingress-class.yaml
+kubectl apply -f common/crds/k8s.nginx.org_virtualservers.yaml
+kubectl apply -f common/crds/k8s.nginx.org_virtualserverroutes.yaml
+kubectl apply -f common/crds/k8s.nginx.org_transportservers.yaml
+kubectl apply -f common/crds/k8s.nginx.org_policies.yaml
+kubectl apply -f common/crds/k8s.nginx.org_globalconfigurations.yaml
+kubectl apply -f common/global-configuration.yaml
+kubectl apply -f common/crds/appprotect.f5.com_aplogconfs.yaml
+kubectl apply -f common/crds/appprotect.f5.com_appolicies.yaml
+kubectl apply -f common/crds/appprotect.f5.com_apusersigs.yaml
+kubectl apply -f daemon-set/nginx-ingress.yaml
+kubectl get pods -n nginx-ingress
+</pre>
 * Clone my github repo
 <pre>
 $ git clone https://github.com/tho861998/kubernetes.git
 $ cd kubernetes/ingress/
 </pre>
+Get Access to the Ingress Controller
 <pre>
-* Go to nginx official documentation and make sure Docker Login 
-* and create a private repo named dockerhub-username/nginx-ingress in your docker hub registry.
-* Then run kubectl apply blah blah like common/sa-and-ns.yaml ( run all kubectl cmd staring from ns till nodeport svc)
-* Check kubectl get all -n nginx-ingress ( if nginx-controller pods are running)
+If you created a daemonset, ports 80 and 443 of the Ingress controller container are mapped to the same ports of the node where the container is running. To access the Ingress controller, use those ports and an IP address of any node of the cluster where the Ingress controller is running.
 </pre>
-* create a haproxy LB with centos vm 
+Loadbalaning with nginx (option 1 ). 10.0.0.5 and 6 are worker nodes ip on which nginx-controller is running.
+<pre>
+apt install nginx -n ( on master node)
+vim /etc/nginx/sites-available/default
+
+upstream myapp1 {
+        server 10.0.0.5;
+        server 10.0.0.6;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://myapp1;
+        }
+}
+Then add your LB (master node )ip in /etc/hosts with domain name you want to use for apps
+</pre>
+* Option 2: LoadBalancing with Haproxy .create a haproxy LB with centos vm 
 * vim /etc/haproxy/haproxy.cfg
 <pre>
 
