@@ -12,3 +12,5 @@ $ kubectl delete mutatingwebhookconfiguration.admissionregistration.k8s.io cert-
 $ kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io cert-manager-webhook
 $ kubectl apply -f haproxy.cfg
 </pre>
+we can use nginx as LB instead of haproxy
+Add LB ip in /etc/hosts
