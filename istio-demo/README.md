@@ -49,13 +49,17 @@ kubectl get svc -n istio-system | grep kiali
 </pre>
 * open browser, http://nodeip:NodePort
 
-* deploy myweb demo .
+* deploy myweb demo and clone my github repo
 <pre>
-kubectl create -f mydata-v1.yaml
-kubectl create -f mydata-v2.yaml
-kubectl create -f myweb.yaml
-kubectl create -f gateway.yaml
-kubectl create -f virtual-service.yaml
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/istio-demo/
+</pre>
+<pre>
+kubectl apply -f mydata-v1.yaml
+kubectl apply -f mydata-v2.yaml
+kubectl apply -f myweb.yaml
+kubectl apply -f gateway.yaml
+kubectl apply -f virtual-service.yaml
 </pre>
 * Monitor this web app using grafana and kiali
 * Test mydata v1 and v2 by splitting traffic with kiali
