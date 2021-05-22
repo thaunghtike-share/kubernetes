@@ -1,6 +1,10 @@
 # kube-ingress
 
-* Firstly,create a kubernetes cluster with kubeadm ( one master and two worker nodes) 
+* Firstly,create a kubernetes cluster with kubeadm ( one master and two worker nodes) and Clone my github repo
+<pre>
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/ingress/
+</pre>
 <pre>
 * Go to nginx official documentation and make sure Docker Login 
 * and create a private repo named dockerhub-username/nginx-ingress in your docker hub registry.
@@ -64,14 +68,11 @@ backend http_back
 * since ingress controller is running, your domain will be redirected to service which has domain  or path) 
 </pre>
 <pre>
-* kubectl create -f nginx-deploy-svc-ingress-red.yaml
-* kubectl create -f nginx-deploy-blue.yaml
-* kubectl create -f nginx-svc-ingress-blue.yaml
-* kubectl create -f nginx-deploy-green.yaml
-* kubectl create -f nginx-svc-ingress-green.yaml
+* kubectl apply -f nginx-deploy-svc-ingress-red.yaml
+* kubectl apply -f nginx-deploy-blue.yaml
+* kubectl apply -f nginx-svc-ingress-blue.yaml
+* kubectl apply -f nginx-deploy-green.yaml
+* kubectl apply -f nginx-svc-ingress-green.yaml
 </pre>
 * Don't forget to add haproxy ip in /etc/hosts of each node .
-* my github repo
-<pre>
-https://github.com/tho861998/kube-ingress
-</pre>
+
