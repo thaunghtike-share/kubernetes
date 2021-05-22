@@ -89,6 +89,7 @@ backend http_back
 * when a user calls domain name which binds with haproxy lb ip, haproxy will load to worker node port 80. On worker nodes port 80, ingress controller is running. ( On previous stage, you deployed ingress controller daemonset, so ingress controllers are running on master and worker nodes)
 * since ingress controller is running, your domain will be redirected to service which has domain  or path) 
 </pre>
+* Note. All are deployed on kubernetes cluster 1.18.0 . If your cluster is 1.20.X , change your ingress configuration version and format.
 <pre>
 * kubectl apply -f nginx-deploy-svc-ingress-red.yaml
 * kubectl apply -f nginx-deploy-blue.yaml
