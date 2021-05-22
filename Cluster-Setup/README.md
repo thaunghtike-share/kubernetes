@@ -1,6 +1,7 @@
 Download kube.sh file on all nodes ( including master)
 <pre>
-$ wget https://github.com/tho861998/kubernetes/blob/main/Cluster-Setup/kube.sh
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/Cluster-Setup
 $ chmod +x kube.sh
 $ ./kube.sh
 </pre>
@@ -11,6 +12,8 @@ $ kubeadm init --apiserver-advertise-address=<master_node_ip> --pod-network-cidr
 Deploy calico network on your master node
 <pre>
 $ kubectl --kubeconfig=/etc/kubernetes/admin.conf create -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+(or)
+$ flannel / weave 
 </pre>
 Run this command to get token on master
 <pre>
