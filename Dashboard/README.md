@@ -6,7 +6,8 @@ $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0
 </pre>
 Now, we deploy dashboard service
 <pre>
-$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/kubernetes-dashboard-deployment.yml
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/Dashboard/
 $ kubectl apply -f kubernetes-dashboard-deployment.yml
 </pre>
 Now we will check the Dashboard's creation and deployment status using this command.
@@ -15,12 +16,10 @@ $  kubectl get deployments -n kubernetes-dashboard
 </pre>
 First, we will create a service account manifest file in which we will define the administrative user for kube-admin and the associated namespace they have access to.
 <pre>
-$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/admin-sa.yml
 $ kubectl apply -f admin-sa.yml
 </pre>
 Next, we will bind the cluster-admin role to the created user.
 <pre>
-$ wget https://github.com/tho861998/kubernetes/blob/main/Dashboard/admin-rbac.yml
 $ kubectl apply -f admin-rbac.yml
 </pre>
 In this step, we store the specific name of the service account.
