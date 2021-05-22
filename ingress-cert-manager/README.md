@@ -1,7 +1,9 @@
 # ingress-cert-manager
 <pre>
-$ wget https://github.com/tho861998/kubernetes/blob/main/ingress-cert-manager/cert-manager-ingress.yaml
-$ wget https://github.com/tho861998/kubernetes/blob/main/ingress-cert-manager/haproxy.cfg
+$ git clone https://github.com/tho861998/kubernetes.git
+$ cd kubernetes/ingress-cert-manager
+$ kubectl apply -f cert-manager-ingress.yaml
+$ kubectl apply -f haproxy.cfg
 </pre>
 Go to official documentation for latest updates:
 All resources (the CustomResourceDefinitions, cert-manager, namespace, and the webhook component) are included in a single YAML manifest file:
