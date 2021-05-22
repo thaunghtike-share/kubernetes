@@ -1,7 +1,7 @@
 Container-Native Storage for Kubernetes Using Heketi and Glusterfs
 * You have to deploy a kubernetes cluster at first.
 <pre>
-https://github.com/tho861998/heketi-glusterfs/blob/main/cluster.txt
+https://github.com/tho861998/kubernetes/Cluster-Setup/README.md
 </pre>
 * Each node that will be running gluster needs at least one raw block device. This block device will be made into an LVM PV and fully managed by Heketi. For typical installs at least three nodes will need to be provisioned. Extra small clusters can be configured with just one node. The three Kubernetes nodes intended to run the GlusterFS Pods must have the appropriate ports opened for GlusterFS communication. Run the following commands on each of the nodes.
 <pre>
