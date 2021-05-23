@@ -378,6 +378,10 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manife
 # On first install only
 kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
 ```
+Expose minio console as LB
+```bash
+kubectl edit svc minio -n minio-operator
+```
 Configre LB ip range.
 ```yaml
 apiVersion: v1
@@ -474,6 +478,52 @@ aws_secret_access_key=23a0d81f-e7a6-47d9-95ff-4a1be136f9ee
 EOF
 ```
 Install Velero in the Kubernetes Cluster. Before deploying velero in kubernetes cluster. Go to minio , create a bucket which will use as a backup storage for velero. In this lab, I will create a bucket named bucketdemo. Then deploy velero in kubernetes cluster
+```bash
+velero install --provider aws --bucket bucketdemo  --secret-file ./minio.credentials  --plugins velero/velero-plugin-for-aws:v1.0.0 \ --backup-location-config region=minio,s3ForcePathStyle=true,s3Url=http://10.0.0.20  --use-restic 
+```
+When velero is deployed successfully, you will see like this.
+```bash
+Velero is installed! ⛵ Use 'kubectl logs deployment/velero -n velero' to view the status.
+```
+Enable tab completion for preferred shell
+```bash
+source <(velero completion bash)
+```
+Next step is to testing backup and restore. To bakup a single namespace.
+```bash
+kubectl create ns testing
+kubectl deploy nginx --image nginx -n testing
+velero backup create nginxbackup --include-namespaces testing
+```
+check backups list in kubernetes.
+```bash
+velero backup get
+velero backup describe nginxbackup
+kubectl get backups -n velero
+```
+after creating your firstbackup. go to minio and you will see backup folder under bucketdemo. To restore backup, first delete your testing namespace.
+```bash
+kubectl delete all --all -n testing
+velero restore create --from-backup nginxbackup
+Restore request "nginxbackup-20210523140045" submitted successfully.
+```
+After restoring backup, check nginx pod are running in testing namespace. You will also see restores folder under bucketdemo on minio.
+```bash 
+kubectl get pods -n testing
+velero restore get
+kubectl get restores -n velero
+```
+Other velero cmds
+```bash
+velero backup create nginxbackup --include-namespaces testing --exclude-resources pods
+velero backup create name --exclude-namespaces
+velero backup create name --exclude-resources secrets/configmaps
+```
+Another useful cmd : you can create backup schedule with cronjobs.
+```bash
+kubectl schedule create firstbackup --scheudle="* * * * *" --include-namespace testing  ### it will create backup every single minute.
+```
+Thanks!
 
 
 
