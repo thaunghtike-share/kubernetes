@@ -175,7 +175,31 @@ cstor-storage-hr48   kworker1   1920G   1920000074k   false      0              
 cstor-storage-vq4d   kworker2   1920G   1920000074k   false      0                     0                 ONLINE   9m53s
 cstor-storage-wvdw   kworker3   1920G   1920000074k   false      0                     0                 ONLINE   9m52s
 ```
-Once your pool instances have come online, you can proceed with volume provisioning.Create a storageClass to dynamically provision volumes using OpenEBS CSI provisioner. A sample storageClass:
+Check blockdevices status.
+
+```bash
+root@kmaster:~# kubectl get blockdevices -n openebs
+NAME                                           NODENAME   SIZE            CLAIMSTATE   STATUS     AGE
+blockdevice-00dbd3173aff10684a95b8c4da20a5fe   kworker2   1099501142016   Unclaimed    Active     34m
+blockdevice-051458b8713c411d362836334e873ac4   kworker3   1099501142016   Unclaimed    Inactive   34m
+blockdevice-0626988d63953239ac321fb2e0fdc5f9   kmaster    1099501142016   Unclaimed    Active     34m
+blockdevice-1e6d651fd9a01cc889a0d3e9a12df01d   kworker2   1099511627776   Claimed      Active     73m
+blockdevice-2ccd2c22fd26a64350de575e6f0f63e7   kmaster    1099501142016   Unclaimed    Active     34m
+blockdevice-3f1521ca4ba60a0768997ec8af173c67   kworker3   4292870144      Unclaimed    Active     73m
+blockdevice-54cd81fb0c088cdd14cc6457e82a4eb0   kworker3   1099501142016   Unclaimed    Inactive   34m
+blockdevice-67651fd6266f40a8e4ed7301c4e30a2e   kworker1   1099511627776   Claimed      Active     73m
+blockdevice-680eb18dd7b630948a2d81f49d65eca9   kworker1   1099511627776   Claimed      Active     73m
+blockdevice-6c0f0ac1aa99c9148ee3d187d08e32a4   kmaster    1099511627776   Claimed      Active     73m
+blockdevice-7a88de9fe00794289c281780f1b98cb4   kmaster    4292870144      Unclaimed    Active     73m
+blockdevice-83c6820ff42807ab41817279d00862c1   kworker1   17177772032     Unclaimed    Active     73m
+blockdevice-93fbbea4eb92daf878e8bfffd47f0651   kworker2   4292870144      Unclaimed    Active     73m
+blockdevice-b4458e89bd5442f64ef890e247176015   kmaster    1099511627776   Claimed      Active     73m
+blockdevice-b82a1982cbe0a26ba9092b9de26daf1c   kworker2   1099511627776   Claimed      Active     73m
+blockdevice-c4ce891150b55fd92f210ffb3f66d3f9   kworker2   1099501142016   Unclaimed    Active     34m
+blockdevice-f202a757991e537a9c4e22a1823b4d7c   kworker3   1099511627776   Claimed      Active     73m
+blockdevice-f98f72fba1346af698937aefbb70ec91   kworker3   1099511627776   Claimed      Active     73m
+```
+You see? 8 blockdevices are claimed following cspc yaml file. Once your pool instances have come online, you can proceed with volume provisioning.Create a storageClass to dynamically provision volumes using OpenEBS CSI provisioner. A sample storageClass:
 ```yaml
    kind: StorageClass
    apiVersion: storage.k8s.io/v1
@@ -221,3 +245,109 @@ Create a pvc using created storage class named cstor-csi.
 ```bash
 kubectl apply -f pvc.yml
 ```
+verify thatthe PVC has been successfully created and bound to a PersistentVolume (PV).
+```bash
+root@kmaster:~# kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+demo-cstor-vol   Bound    pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817   5Gi        RWO            cstor-csi      96s
+```
+After creating a pvc, target pods will be created in openebs namespace. Target pod will make sure to connect to cluster pool instance pods to replicate persistent data. Target pod results from creating pvc. Pool pods result from creating cspi.
+```bash
+root@kmaster:~# kubectl get pods -n openebs -o wide | grep cstor ### pool pods are created on every nodes to store data
+cstor-storage-drr8-7557675774-fgbrq                               3/3     Running   0          24m     10.32.0.4   kmaster    <none>           <none>
+cstor-storage-hr48-7864c69c47-hldjd                               3/3     Running   0          24m     10.42.0.6   kworker1   <none>           <none>
+cstor-storage-vq4d-fd55c584c-f9mlc                                3/3     Running   0          24m     10.44.0.4   kworker2   <none>           <none>
+cstor-storage-wvdw-64f6bcf459-7795b                               3/3     Running   0          24m     10.36.0.3   kworker3   <none>           <none>
+```
+
+```bash
+root@kmaster:~# kubectl get pods -n openebs -o wide | grep pvc ### target pod will make to replicate persistend data from cstorvolumereplicas to cspi.
+pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-target-77f9b8dcc6krsmn   3/3     Running   0          6m27s   10.42.0.7   kworker1   <none>           <none>
+```
+Verify cstorvolume and its replicas are in `Healthy` state.
+
+```bash
+root@kmaster:~# kubectl get cstorvolume,cvr -n openebs
+NAME                                                                    CAPACITY   STATUS    AGE
+cstorvolume.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817   5Gi        Healthy   9m15s
+
+NAME                                                                                              ALLOCATED   USED   STATUS    AGE
+cstorvolumereplica.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-cstor-storage-drr8   6K          6K     Healthy   9m14s
+cstorvolumereplica.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-cstor-storage-hr48   6K          6K     Healthy   9m14s
+cstorvolumereplica.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-cstor-storage-vq4d   6K          6K     Healthy   9m14s
+cstorvolumereplica.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-cstor-storage-wvdw   6K          6K     Healthy   9m14s
+```
+after deploying cstorvolume will create a isci LUN disk to node where pod will be deployed. cstorvolumereplicas make sure to replicate data from LUN disk to all cstor pool instances. to replicate data is the duty of pvc-### pods. to keep resulted data is the duty of pool pods cstor-storage-##. Create an application and use the above created PVC.
+
+```yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: busybox
+      namespace: default
+    spec:
+      containers:
+      - command:
+           - sh
+           - -c
+           - 'date >> /mnt/openebs-csi/date.txt; hostname >> /mnt/openebs-csi/hostname.txt; sync; sleep 5; sync; tail -f /dev/null;'
+        image: busybox
+        imagePullPolicy: Always
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/openebs-csi
+          name: demo-vol
+      volumes:
+      - name: demo-vol
+        persistentVolumeClaim:
+          claimName: demo-cstor-vol
+```
+```bash
+kubectl apply -f pod.yml
+```
+```bash
+root@kmaster:~# kubectl get pods -o wide
+NAME      READY   STATUS    RESTARTS   AGE   IP          NODE       NOMINATED NODE   READINESS GATES
+busybox   1/1     Running   0          35s   10.42.0.8   kworker1   <none>           <none>
+```
+pod is deployed on worker1. so check disks on worker1 with lsblk cmd. 
+
+```bash
+root@kworker1:~# lsblk
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0     7:0    0 55.5M  1 loop /snap/core18/1997
+loop1     7:1    0 67.6M  1 loop /snap/lxd/20326
+loop2     7:2    0 32.1M  1 loop /snap/snapd/11841
+sda       8:0    0   16G  0 disk 
+└─sda1    8:1    0   16G  0 part /mnt
+sdb       8:16   0   30G  0 disk 
+├─sdb1    8:17   0 29.9G  0 part /
+├─sdb14   8:30   0    4M  0 part 
+└─sdb15   8:31   0  106M  0 part /boot/efi
+sdc       8:32   0    1T  0 disk 
+├─sdc1    8:33   0 1024G  0 part 
+└─sdc9    8:41   0    8M  0 part 
+sdd       8:48   0    1T  0 disk 
+├─sdd1    8:49   0 1024G  0 part 
+└─sdd9    8:57   0    8M  0 part 
+sde       8:64   0    5G  0 disk /var/lib/kubelet/pods/434bcd1f-265c-4235-b2b1-3a1b93753a61/volumes/kubernetes.io~csi/pvc-4774a4ff-fbc6-4700-a6b4-c911
+sr0      11:0    1  628K  0 rom  
+```
+here /dev/sde is a LUN cscsi disk created from cstorvolume. pod data are stored in worker1 . so how replicate to all worker nodes. It is the role of cstorvolumereplicas and pvc-##-## pod .
+
+The example busybox application will write the current date into the mounted path at `/mnt/openebs-csi/date.txt` when it starts.
+
+ ```bash
+ $ kubectl exec -it busybox -- cat /mnt/openebs-csi/date.txt
+ Wed Jul 12 07:00:26 UTC 2020
+````
+check ls on worker 1 LUN disk.
+
+```bash
+root@kworker1:~# ls /var/lib/kubelet/pods/434bcd1f-265c-4235-b2b1-3a1b93753a61/volumes/kubernetes.io~csi/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817/mount/
+date.txt  hostname.txt  
+
+root@kworker1:~# cat /var/lib/kubelet/pods/434bcd1f-265c-4235-b2b1-3a1b93753a61/volumes/kubernetes.io~csi/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817/mount/date.txt 
+Sun May 23 03:52:27 UTC 2021
+```
+
