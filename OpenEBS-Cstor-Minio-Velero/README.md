@@ -176,5 +176,48 @@ cstor-storage-vq4d   kworker2   1920G   1920000074k   false      0              
 cstor-storage-wvdw   kworker3   1920G   1920000074k   false      0                     0                 ONLINE   9m52s
 ```
 Once your pool instances have come online, you can proceed with volume provisioning.Create a storageClass to dynamically provision volumes using OpenEBS CSI provisioner. A sample storageClass:
+```yaml
+   kind: StorageClass
+   apiVersion: storage.k8s.io/v1
+   metadata:
+     name: cstor-csi
+   provisioner: cstor.csi.openebs.io
+   allowVolumeExpansion: true
+   parameters:
+     cas-type: cstor
+     # cstorPoolCluster should have the name of the CSPC
+     cstorPoolCluster: cstor-storage
+     # replicaCount should be <= no. of CSPI
+     replicaCount: "4"
+    
+ ```
+Apply storage class.
+<pre>
+kubectl apply -f cstor-sc.yml
+</pre>
+You will need to specify the correct cStor CSPC from your cluster and specify the desired `replicaCount` for the volume. The `replicaCount` should be less than or equal to the max pool instances available. Openebs is a dynamic storage solution. So, you don't need to deploy pv. Openebs provide pv as container-attached storage.
 
+```bash
+root@kmaster:~# kubectl get pods -n openebs | grep provision
+openebs-localpv-provisioner-9f598b455-7pz6f       1/1     Running   0          53m
+openebs-provisioner-65749f64fd-hcxr8              1/1     Running   0          53m
 
+```
+Create a pvc using created storage class named cstor-csi.
+
+```yaml
+    kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: demo-cstor-vol
+    spec:
+      storageClassName: cstor-csi
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+```
+```bash
+kubectl apply -f pvc.yml
+```
