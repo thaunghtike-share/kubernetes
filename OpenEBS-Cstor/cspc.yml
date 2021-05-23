@@ -1,0 +1,42 @@
+apiVersion: cstor.openebs.io/v1
+kind: CStorPoolCluster
+metadata:
+  name: cstor-storage
+  namespace: openebs
+spec:
+  pools:
+    - nodeSelector:
+        kubernetes.io/hostname: "kmaster"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-6c0f0ac1aa99c9148ee3d187d08e32a4"
+            - blockDeviceName: "blockdevice-b4458e89bd5442f64ef890e247176015"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker1" 
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-67651fd6266f40a8e4ed7301c4e30a2e"
+            - blockDeviceName: "blockdevice-680eb18dd7b630948a2d81f49d65eca9"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+   
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker2"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-1e6d651fd9a01cc889a0d3e9a12df01d"
+            - blockDeviceName: "blockdevice-b82a1982cbe0a26ba9092b9de26daf1c"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+    
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker3"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-f202a757991e537a9c4e22a1823b4d7c"
+            - blockDeviceName: "blockdevice-f98f72fba1346af698937aefbb70ec91"
+      poolConfig:
+        dataRaidGroupType: "stripe"
