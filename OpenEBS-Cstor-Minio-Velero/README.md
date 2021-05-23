@@ -42,10 +42,116 @@ Run this command on master. Run resulted token starting with kubeadm on all work
 kubeadm token create --print-join-command
 </pre>
 Finally, you created  a kube cluster version 1.20.0 successfully.
-<pre>
+```bash
 root@kmaster:~# kubectl get nodes -o wide
-NAME       STATUS   ROLES             AGE     VERSION   
-kmaster    Ready    master            4m42s   v1.20.0   
-kworker1   Ready    <none>            68s     v1.20.0   
-kworker2   Ready    <none>            66s     v1.20.0  
-kworker3   Ready    <none>            63s     v1.20.0  
+NAME       STATUS   ROLES                  AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+kmaster    Ready    control-plane,master   55m   v1.20.0   10.0.0.4      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker1   Ready    <none>                 51m   v1.20.0   10.0.0.5      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker2   Ready    <none>                 51m   v1.20.0   10.0.0.6      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker3   Ready    <none>                 51m   v1.20.0   10.0.0.7      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+```
+<pre>
+kubectl get nodes -o wide
+</pre>
+In this lab, I will use master node as both control plane and worker node. So remove taints from worker nodes to deploy apps on master node.
+<pre>
+kubectl taint nodes $(kubectl get nodes --selector=node-role.kubernetes.io/master | awk 'FNR==2{print $1}') node-role.kubernetes.io/master-
+</pre>
+Next, we will start creating cstor persistent volume . First step is to deploy OpenEbs operators. You can read about openebs detail in official docs.
+<pre>
+kubectl apply -f https://openebs.github.io/charts/openebs-operator.yaml
+<pre>
+Before installing cstor operator. You must enable iscsid service on all nodes.
+<pre>
+systemctl enable --now iscsid
+</pre>
+Install latest cstor operator.
+<pre>
+kubectl apply -f https://openebs.github.io/charts/cstor-operator.yaml
+</pre>
+check all pods are running in openebs namespace.
+<pre>
+kubectl get pods -n openebs
+</pre>
+```bash
+root@kmaster:~# kubectl get pods -n openebs
+NAME                                              READY   STATUS    RESTARTS   AGE
+cspc-operator-6d796d7b8f-qk28b                    1/1     Running   0          31m
+cstor-storage-drr8-7557675774-fgbrq               3/3     Running   0          3m10s
+cstor-storage-hr48-7864c69c47-hldjd               3/3     Running   0          3m9s
+cstor-storage-vq4d-fd55c584c-f9mlc                3/3     Running   0          3m8s
+cstor-storage-wvdw-64f6bcf459-7795b               3/3     Running   0          3m8s
+cvc-operator-849dff65c-x6pzb                      1/1     Running   0          31m
+maya-apiserver-55db98dc94-d8tmq                   1/1     Running   0          42m
+openebs-admission-server-574cf7c984-d9tjk         1/1     Running   0          42m
+openebs-cstor-admission-server-5d868c64d4-cxfc6   1/1     Running   0          31m
+openebs-cstor-csi-controller-0                    6/6     Running   0          31m
+openebs-cstor-csi-node-5s4ws                      2/2     Running   0          31m
+openebs-cstor-csi-node-j9w4z                      2/2     Running   0          31m
+openebs-cstor-csi-node-m7xt9                      2/2     Running   0          31m
+openebs-cstor-csi-node-q8rg6                      2/2     Running   0          31m
+openebs-localpv-provisioner-9f598b455-7pz6f       1/1     Running   0          42m
+openebs-ndm-94pmf                                 1/1     Running   0          30m
+openebs-ndm-dmcwm                                 1/1     Running   0          31m
+openebs-ndm-fppmz                                 1/1     Running   0          31m
+openebs-ndm-operator-59ffcfc949-m5w29             1/1     Running   0          31m
+openebs-ndm-vslck                                 1/1     Running   0          31m
+openebs-provisioner-65749f64fd-hcxr8              1/1     Running   0          42m
+openebs-snapshot-operator-5cfbb6fdb5-ffxvr        2/2     Running   0          42m
+```
+Check that blockdevices are created:. See one blockdevice means one disk attached to node.
+<pre>
+kubectl get blockdevices -n openebs -o wide
+</pre>
+Provision a CStorPoolCluster. Use blockdevice which are not mounted or formatted. Don't use blockdevice like ext4.
+
+```yaml
+apiVersion: cstor.openebs.io/v1
+kind: CStorPoolCluster
+metadata:
+  name: cstor-storage
+  namespace: openebs
+spec:
+  pools:
+    - nodeSelector:
+        kubernetes.io/hostname: "kmaster"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-6c0f0ac1aa99c9148ee3d187d08e32a4"
+            - blockDeviceName: "blockdevice-b4458e89bd5442f64ef890e247176015"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker1" 
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-67651fd6266f40a8e4ed7301c4e30a2e"
+            - blockDeviceName: "blockdevice-680eb18dd7b630948a2d81f49d65eca9"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+   
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker2"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-1e6d651fd9a01cc889a0d3e9a12df01d"
+            - blockDeviceName: "blockdevice-b82a1982cbe0a26ba9092b9de26daf1c"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+    
+    - nodeSelector:
+        kubernetes.io/hostname: "kworker3"
+      dataRaidGroups:
+        - blockDevices:
+            - blockDeviceName: "blockdevice-f202a757991e537a9c4e22a1823b4d7c"
+            - blockDeviceName: "blockdevice-f98f72fba1346af698937aefbb70ec91"
+      poolConfig:
+        dataRaidGroupType: "stripe"
+```
+<pre>
+kubectl apply -f cspc.yml
+</pre>
+
+
+
