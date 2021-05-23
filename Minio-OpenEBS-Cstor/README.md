@@ -21,7 +21,7 @@ apt update
 apt install docker-ce containerd.io -y
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-apt update && apt install -y kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
+apt update && apt install -y kubeadm=1.18.0-00 kubelet=1.18.0-00 kubectl=1.18.0-00
 }
 ```
 Run this command to create a cluster on master node. 10.0.0.4 means master_node private ip.
@@ -45,10 +45,10 @@ Finally, you created  a kube cluster version 1.20.0 successfully.
 ```bash
 root@kmaster:~# kubectl get nodes -o wide
 NAME       STATUS   ROLES                  AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
-kmaster    Ready    control-plane,master   55m   v1.20.0   10.0.0.4      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
-kworker1   Ready    <none>                 51m   v1.20.0   10.0.0.5      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
-kworker2   Ready    <none>                 51m   v1.20.0   10.0.0.6      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
-kworker3   Ready    <none>                 51m   v1.20.0   10.0.0.7      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kmaster    Ready    control-plane,master   55m   v1.18.0   10.0.0.4      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker1   Ready    <none>                 51m   v1.18.0   10.0.0.5      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker2   Ready    <none>                 51m   v1.18.0   10.0.0.6      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker3   Ready    <none>                 51m   v1.18.0   10.0.0.7      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
 ```
 <pre>
 kubectl get nodes -o wide
@@ -371,23 +371,109 @@ operator          ClusterIP   10.106.155.72    <none>        4222/TCP,4233/TCP  
 tenant1-console   ClusterIP   10.110.238.172   <none>        9090/TCP            25s
 tenant1-hl        ClusterIP   None             <none>        9000/TCP            8m47s
 ```
-Expose minio and console service as nodeport type.
+Expose minio and console service as loadbalancer. Fisrtly deploy metalb.
 ```bash
-kubectl edit svc minio -n minio-operator
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
+# On first install only
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
 ```
-Now, access the MinIO service over the browser using the following way.
+Configre LB ip range.
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 10.0.0.20-10.0.0.25
+```
+Apply metallb.
 ```bash
-http://<node_ip>:<nodeport_ip>
+kubectl apply -f metallb.yml
+```
+Check minio service status.
+```bash
+root@kmaster:~# kubectl get svc -n minio-operator
+NAME              TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
+console           NodePort       10.100.69.146    <none>        9090:30317/TCP,9443:30003/TCP   4h49m
+minio             LoadBalancer   10.111.119.194   10.0.0.20     80:30245/TCP                    4h40m
+operator          ClusterIP      10.106.155.72    <none>        4222/TCP,4233/TCP               4h49m
+tenant1-console   ClusterIP      10.110.238.172   <none>        9090/TCP                        4h32m
+tenant1-hl        ClusterIP      None             <none>        9000/TCP                        4h40m
+```
+Access minio via LB ip.
+```bash
+http://10.0.0.20
+```
 ```
 You should enter the Access key and Secret key to login into the user console. These credentials can be obtained from the secret.
 ```bash
-kubectl get secret tenant1-creds-secret -o yaml
+kubectl get secret tenant1-creds-secret -o yaml -n minio-operator
 ```
-Install latest velero binary and extract it 
+```yaml
+apiVersion: v1
+data:
+  accesskey: NTRiNmJiZGItZTk0Ny00MjM2LTk5MTktMmEzYWQwN2FiYWVl
+  secretkey: MjNhMGQ4MWYtZTdhNi00N2Q5LTk1ZmYtNGExYmUxMzZmOWVl
+kind: Secret
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"accesskey":"NTRiNmJiZGItZTk0Ny00MjM2LTk5MTktMmEzYWQwN2FiYWVl","secretkey":"MjNhMGQ4MWYtZTdhNi00N2Q5LTk1ZmYtNGExYmUxMzZmOWVl"},"kind":"Secret","metadata":{"annotations":{},"creationTimestamp":null,"name":"tenant1-creds-secret","namespace":"minio-operator"}}
+  creationTimestamp: "2021-05-23T07:48:40Z"
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        .: {}
+        f:accesskey: {}
+        f:secretkey: {}
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:type: {}
+    manager: kubectl-client-side-apply
+    operation: Update
+    time: "2021-05-23T07:48:40Z"
+  name: tenant1-creds-secret
+  namespace: minio-operator
+  resourceVersion: "6452"
+  uid: 7ea7fb59-57ff-43fc-9951-62ff137defb9
+type: Opaque
+```
+Decoding of the above credentials can be retrieved by following way.
+Access key
+```bash
+echo -n "NTRiNmJiZGItZTk0Ny00MjM2LTk5MTktMmEzYWQwN2FiYWVl" | base64 -d; echo
+```
+Secret Key
+```bash
+ echo "MjNhMGQ4MWYtZTdhNi00N2Q5LTk1ZmYtNGExYmUxMzZmOWVl" | base64 -d; echo
+ ```
+After login to minio successfully, install latest velero binary and extract it 
 ```bash
 wget https://github.com/heptio/velero/releases/download/v1.6.0/velero-v1.6.0-linux-amd64.tar.gz
 tar zxf velero-v1.6.0-linux-amd64.tar.gz
 sudo mv velero-v1.6.0-linux-amd64/velero /usr/local/bin/
 rm -rf velero*
 ```
+Create credentials file (Needed for velero initialization)
+```bash
+cat <<EOF>> minio.credentials
+[default]
+aws_access_key_id=54b6bbdb-e947-4236-9919-2a3ad07abaee
+aws_secret_access_key=23a0d81f-e7a6-47d9-95ff-4a1be136f9ee
+EOF
+```
+Install Velero in the Kubernetes Cluster. Before deploying velero in kubernetes cluster. Go to minio , create a bucket which will use as a backup storage for velero. In this lab, I will create a bucket named bucketdemo. Then deploy velero in kubernetes cluster
+
+
 
