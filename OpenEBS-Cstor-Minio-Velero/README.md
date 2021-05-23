@@ -280,27 +280,28 @@ cstorvolumereplica.cstor.openebs.io/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817-cst
 after deploying cstorvolume will create a isci LUN disk to node where pod will be deployed. cstorvolumereplicas make sure to replicate data from LUN disk to all cstor pool instances. to replicate data is the duty of pvc-### pods. to keep resulted data is the duty of pool pods cstor-storage-##. Create an application and use the above created PVC.
 
 ```yaml
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: busybox
-      namespace: default
-    spec:
-      containers:
-      - command:
-           - sh
-           - -c
-           - 'date >> /mnt/openebs-csi/date.txt; hostname >> /mnt/openebs-csi/hostname.txt; sync; sleep 5; sync; tail -f /dev/null;'
-        image: busybox
-        imagePullPolicy: Always
-        name: busybox
-        volumeMounts:
-        - mountPath: /mnt/openebs-csi
-          name: demo-vol
-      volumes:
-      - name: demo-vol
-        persistentVolumeClaim:
-          claimName: demo-cstor-vol
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: default
+spec:
+  containers:
+  - command:
+       - sh
+       - -c
+       - 'date >> /mnt/openebs-csi/date.txt; hostname >> /mnt/openebs-csi/hostname.txt; sync; sleep 5; sync; tail -f /dev/null;'
+    image: busybox
+    imagePullPolicy: Always
+    name: busybox
+    volumeMounts:
+    - mountPath: /mnt/openebs-csi
+      name: demo-vol
+  volumes:
+  - name: demo-vol
+    persistentVolumeClaim:
+      claimName: demo-cstor-vol
+
 ```
 ```bash
 kubectl apply -f pod.yml
@@ -350,4 +351,14 @@ date.txt  hostname.txt
 root@kworker1:~# cat /var/lib/kubelet/pods/434bcd1f-265c-4235-b2b1-3a1b93753a61/volumes/kubernetes.io~csi/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817/mount/date.txt 
 Sun May 23 03:52:27 UTC 2021
 ```
-Let's see how pod is going when worker1 goes down. And where does LUN disk create?
+Let's see how pod is going when worker1 goes down. And where does LUN disk create? Kubelet will terminate old pod and create a new pod on another node. wait for 5 minute to reschedule. If you want to wait for rescheduling, you can delete pod manually. after creating a new pod, you will see persistent data.
+```bash
+kubectl delete -f pod.yml --force
+kubectl apply -f pod.yml 
+```
+```bash
+root@kmaster:~# kubectl exec -it busybox -- cat /mnt/openebs-csi/date.txt
+Sun May 23 05:11:53 UTC 2021
+Sun May 23 05:14:39 UTC 2021
+```
+Thank!
