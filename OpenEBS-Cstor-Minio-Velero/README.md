@@ -60,7 +60,7 @@ kubectl taint nodes $(kubectl get nodes --selector=node-role.kubernetes.io/maste
 Next, we will start creating cstor persistent volume . First step is to deploy OpenEbs operators. You can read about openebs detail in official docs.
 <pre>
 kubectl apply -f https://openebs.github.io/charts/openebs-operator.yaml
-<pre>
+</pre>
 Before installing cstor operator. You must enable iscsid service on all nodes.
 <pre>
 systemctl enable --now iscsid
@@ -149,9 +149,20 @@ spec:
       poolConfig:
         dataRaidGroupType: "stripe"
 ```
+Apply the modified CSPC YAML.
 <pre>
 kubectl apply -f cspc.yml
 </pre>
+Check if the pool instances report their status as 'ONLINE'.
+```bash
+kubectl get cscp -n openebs
+```
+
+```bash
+root@kmaster:~# kubectl get cspc -n openebs
+NAME            HEALTHYINSTANCES   PROVISIONEDINSTANCES   DESIREDINSTANCES   AGE
+cstor-storage   4                  4                      4                  8m9s
+```
 
 
 
