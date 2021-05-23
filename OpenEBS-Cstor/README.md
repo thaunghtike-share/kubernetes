@@ -361,4 +361,158 @@ root@kmaster:~# kubectl exec -it busybox -- cat /mnt/openebs-csi/date.txt
 Sun May 23 05:11:53 UTC 2021
 Sun May 23 05:14:39 UTC 2021
 ```
+Tesing with Statefulset. Create storage class at first. Statefulset use one pv for one pod. So,  you don't need to create pvc manually. PVC will be creae in statefulset.
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  serviceName: "nginx"
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: cstor-csi
+      resources:
+        requests:
+          storage: 1Gi
+```
+```bash
+kubectl apply -f sc.yml
+kubectl apply -f statefulset.yml
+```
+```bash
+root@kmaster:~# kubectl get pods -o wide
+NAME    READY   STATUS    RESTARTS   AGE     IP          NODE       NOMINATED NODE   READINESS GATES
+web-0   1/1     Running   0          3m28s   10.42.0.3   kworker1   <none>           <none>
+web-1   1/1     Running   0          2m48s   10.42.0.4   kworker1   <none>           <none>
+web-2   1/1     Running   0          2m6s    10.44.0.3   kworker2   <none>           <none>
+web-3   1/1     Running   0          86s     10.42.0.6   kworker1   <none>           <none>
+web-4   1/1     Running   0          48s     10.42.0.7   kworker1   <none>           <none>
+
+root@kmaster:~# kubectl get pvc
+NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+www-web-0   Bound    pvc-7fca0104-c93c-48b0-a220-ca20759c694d   1Gi        RWO            cstor-csi      3m36s
+www-web-1   Bound    pvc-ee5dc775-e922-4649-b206-9575e1837008   1Gi        RWO            cstor-csi      2m56s
+www-web-2   Bound    pvc-7b245231-71e6-46f5-b26c-f6340d91da83   1Gi        RWO            cstor-csi      2m14s
+www-web-3   Bound    pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f   1Gi        RWO            cstor-csi      94s
+www-web-4   Bound    pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a   1Gi        RWO            cstor-csi      56s
+
+root@kmaster:~# kubectl get pods -n openebs | grep pvc
+pvc-7b245231-71e6-46f5-b26c-f6340d91da83-target-8669dd674-5dgd7   3/3     Running   1          2m34s
+pvc-7fca0104-c93c-48b0-a220-ca20759c694d-target-7f9bb4b6dcjjldj   3/3     Running   0          3m55s
+pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f-target-5b75d9fc76lwvbn   3/3     Running   0          113s
+pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a-target-595c7c49bbkwtxp   3/3     Running   1          75s
+pvc-ee5dc775-e922-4649-b206-9575e1837008-target-587b674546hjtbw   3/3     Running   0          3m16s
+
+root@kmaster:~# kubectl get cstorvolume,cvr -n openebs
+NAME                                                                    CAPACITY   STATUS    AGE
+cstorvolume.cstor.openebs.io/pvc-7b245231-71e6-46f5-b26c-f6340d91da83   1Gi        Healthy   2m58s
+cstorvolume.cstor.openebs.io/pvc-7fca0104-c93c-48b0-a220-ca20759c694d   1Gi        Healthy   4m19s
+cstorvolume.cstor.openebs.io/pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f   1Gi        Healthy   2m17s
+cstorvolume.cstor.openebs.io/pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a   1Gi        Healthy   99s
+cstorvolume.cstor.openebs.io/pvc-ee5dc775-e922-4649-b206-9575e1837008   1Gi        Healthy   3m40s
+
+NAME                                                                                              ALLOCATED   USED    STATUS    AGE
+cstorvolumereplica.cstor.openebs.io/pvc-7b245231-71e6-46f5-b26c-f6340d91da83-cstor-storage-drr8   29K         1.40M   Healthy   2m57s
+cstorvolumereplica.cstor.openebs.io/pvc-7b245231-71e6-46f5-b26c-f6340d91da83-cstor-storage-hr48   28.5K       1.40M   Healthy   2m57s
+cstorvolumereplica.cstor.openebs.io/pvc-7b245231-71e6-46f5-b26c-f6340d91da83-cstor-storage-vq4d   29K         1.40M   Healthy   2m58s
+cstorvolumereplica.cstor.openebs.io/pvc-7b245231-71e6-46f5-b26c-f6340d91da83-cstor-storage-wvdw   29K         1.40M   Healthy   2m58s
+cstorvolumereplica.cstor.openebs.io/pvc-7fca0104-c93c-48b0-a220-ca20759c694d-cstor-storage-drr8   28.5K       1.40M   Healthy   4m19s
+cstorvolumereplica.cstor.openebs.io/pvc-7fca0104-c93c-48b0-a220-ca20759c694d-cstor-storage-hr48   29K         1.40M   Healthy   4m19s
+cstorvolumereplica.cstor.openebs.io/pvc-7fca0104-c93c-48b0-a220-ca20759c694d-cstor-storage-vq4d   29K         1.40M   Healthy   4m19s
+cstorvolumereplica.cstor.openebs.io/pvc-7fca0104-c93c-48b0-a220-ca20759c694d-cstor-storage-wvdw   28.5K       1.40M   Healthy   4m19s
+cstorvolumereplica.cstor.openebs.io/pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f-cstor-storage-drr8   28.5K       1.40M   Healthy   2m17s
+cstorvolumereplica.cstor.openebs.io/pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f-cstor-storage-hr48   29K         1.40M   Healthy   2m17s
+cstorvolumereplica.cstor.openebs.io/pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f-cstor-storage-vq4d   29K         1.40M   Healthy   2m17s
+cstorvolumereplica.cstor.openebs.io/pvc-aa5f264e-0d17-4c3a-b32b-8c36f3d92f4f-cstor-storage-wvdw   28.5K       1.40M   Healthy   2m17s
+cstorvolumereplica.cstor.openebs.io/pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a-cstor-storage-drr8   28.5K       1.31M   Healthy   99s
+cstorvolumereplica.cstor.openebs.io/pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a-cstor-storage-hr48   28.5K       1.34M   Healthy   99s
+cstorvolumereplica.cstor.openebs.io/pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a-cstor-storage-vq4d   29K         1.37M   Healthy   99s
+cstorvolumereplica.cstor.openebs.io/pvc-c4843b9d-cce6-4bbb-ba30-e69f7e7e017a-cstor-storage-wvdw   28.5K       1.34M   Healthy   99s
+cstorvolumereplica.cstor.openebs.io/pvc-ee5dc775-e922-4649-b206-9575e1837008-cstor-storage-drr8   29K         1.41M   Healthy   3m40s
+cstorvolumereplica.cstor.openebs.io/pvc-ee5dc775-e922-4649-b206-9575e1837008-cstor-storage-hr48   29.5K       1.41M   Healthy   3m40s
+cstorvolumereplica.cstor.openebs.io/pvc-ee5dc775-e922-4649-b206-9575e1837008-cstor-storage-vq4d   29.5K       1.41M   Healthy   3m40s
+cstorvolumereplica.cstor.openebs.io/pvc-ee5dc775-e922-4649-b206-9575e1837008-cstor-storage-wvdw   29.5K       1.41M   Healthy   3m40s
+```
+Pods are running on worker1 and worker2. One pod will consume one pv. So, there will be 5 pvcs and 5 LUN disks on worker1 and worker2. Check 
+```bash
+root@kworker1:~# lsblk
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0     7:0    0 55.5M  1 loop /snap/core18/1997
+loop1     7:1    0 32.1M  1 loop /snap/snapd/11841
+loop2     7:2    0 67.6M  1 loop /snap/lxd/20326
+loop3     7:3    0 55.4M  1 loop /snap/core18/2066
+sda       8:0    0   30G  0 disk 
+├─sda1    8:1    0 29.9G  0 part /
+├─sda14   8:14   0    4M  0 part 
+└─sda15   8:15   0  106M  0 part /boot/efi
+sdb       8:16   0    1T  0 disk 
+├─sdb1    8:17   0 1024G  0 part 
+└─sdb9    8:25   0    8M  0 part 
+sdc       8:32   0    1T  0 disk 
+├─sdc1    8:33   0 1024G  0 part 
+└─sdc9    8:41   0    8M  0 part 
+sdd       8:48   0   16G  0 disk 
+└─sdd1    8:49   0   16G  0 part /mnt
+sde       8:64   0    1G  0 disk /var/lib/kubelet/pods/79eba3ca-cd41-49b5-800d-e53606a61e43/volumes/kubernetes.io~csi/pvc-7fca0104-c93c-48b0-a220-ca20
+sdf       8:80   0    1G  0 disk /var/lib/kubelet/pods/9cbeefe4-997e-45c4-821d-9e056110e15e/volumes/kubernetes.io~csi/pvc-ee5dc775-e922-4649-b206-9575
+sdg       8:96   0    1G  0 disk /var/lib/kubelet/pods/1a850cf9-4f19-4a9b-93be-d54937f8156b/volumes/kubernetes.io~csi/pvc-aa5f264e-0d17-4c3a-b32b-8c36
+sdh       8:112  0    1G  0 disk /var/lib/kubelet/pods/7ab643c8-032b-4423-8400-72a63fb8a8dc/volumes/kubernetes.io~csi/pvc-c4843b9d-cce6-4bbb-ba30-e69f
+
+root@kworker2:~# lsblk
+NAME    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0     7:0    0 55.5M  1 loop /snap/core18/1997
+loop1     7:1    0 55.4M  1 loop /snap/core18/2066
+loop2     7:2    0 67.6M  1 loop /snap/lxd/20326
+loop3     7:3    0 32.1M  1 loop /snap/snapd/11841
+sda       8:0    0    4G  0 disk 
+└─sda1    8:1    0    4G  0 part /mnt
+sdb       8:16   0    1T  0 disk 
+├─sdb1    8:17   0 1024G  0 part 
+└─sdb9    8:25   0    8M  0 part 
+sdc       8:32   0    1T  0 disk 
+├─sdc1    8:33   0 1024G  0 part 
+└─sdc9    8:41   0    8M  0 part 
+sdd       8:48   0   30G  0 disk 
+├─sdd1    8:49   0 29.9G  0 part /
+├─sdd14   8:62   0    4M  0 part 
+└─sdd15   8:63   0  106M  0 part /boot/efi
+sde       8:64   0    1G  0 disk /var/lib/kubelet/pods/d7b04f0f-d68b-405b-a87b-7c22d093a9a1/volumes/kubernetes.io~csi/pvc-7b245231-71e6-46f5-b26c-f634
+```
+One Pod is related to one pvc where pod is bounding. 
 Thank!
