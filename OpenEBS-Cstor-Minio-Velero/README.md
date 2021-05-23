@@ -37,3 +37,16 @@ Deploy weave CNI plugin on master node. Don't use calico cni in this lab. You ha
 <pre>
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 </pre>
+Run this command on master. Run resulted token starting with kubeadm on all worker nodes to join cluster.
+<pre>
+kubeadm token create --print-join-command
+</pre>
+Finally, you created  a kube cluster version 1.20.0 successfully.
+<pre>
+root@kmaster:~# kubectl get nodes -o wide
+NAME       STATUS   ROLES                  AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+kmaster    Ready    control-plane,master   4m42s   v1.20.0   10.0.0.4      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker1   Ready    <none>                 68s     v1.20.0   10.0.0.5      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker2   Ready    <none>                 66s     v1.20.0   10.0.0.6      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+kworker3   Ready    <none>                 63s     v1.20.0   10.0.0.7      <none>        Ubuntu 20.04.2 LTS   5.4.0-1047-azure   docker://20.10.6
+</pre>
