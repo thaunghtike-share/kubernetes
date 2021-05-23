@@ -44,8 +44,8 @@ kubeadm token create --print-join-command
 Finally, you created  a kube cluster version 1.20.0 successfully.
 <pre>
 root@kmaster:~# kubectl get nodes -o wide
-NAME       STATUS   ROLES                  AGE     VERSION   
-kmaster    Ready    master                 4m42s   v1.20.0   
-kworker1   Ready    <none>                 68s     v1.20.0   
-kworker2   Ready    <none>                 66s     v1.20.0  
-kworker3   Ready    <none>                 63s     v1.20.0  
+NAME       STATUS   ROLES             AGE     VERSION   
+kmaster    Ready    master            4m42s   v1.20.0   
+kworker1   Ready    <none>            68s     v1.20.0   
+kworker2   Ready    <none>            66s     v1.20.0  
+kworker3   Ready    <none>            63s     v1.20.0  
