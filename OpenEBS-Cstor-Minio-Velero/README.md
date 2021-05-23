@@ -5,7 +5,7 @@
 Every node should has at least 2CPU and 4GB RAM to deploy Minio Storage on them.
 
 * Firstly, we have to create a kubernetes cluster. Run it on all 4 nodes to install require packages.
-<pre>
+```bash
 {
 ufw disable
 swapoff -a; sed -i '/swap/d' /etc/fstab
@@ -23,7 +23,7 @@ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt update && apt install -y kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
 }
-</pre>
+```
 Run this command to create a cluster on master node. 10.0.0.4 means master_node private ip.
 <pre>
 kubeadm init --apiserver-advertise-address=10.0.0.4 --pod-network-cidr=192.168.0.0/16  --ignore-preflight-errors=all
