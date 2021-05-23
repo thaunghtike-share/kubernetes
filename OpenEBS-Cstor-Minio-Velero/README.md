@@ -350,4 +350,4 @@ date.txt  hostname.txt
 root@kworker1:~# cat /var/lib/kubelet/pods/434bcd1f-265c-4235-b2b1-3a1b93753a61/volumes/kubernetes.io~csi/pvc-4774a4ff-fbc6-4700-a6b4-c911314bd817/mount/date.txt 
 Sun May 23 03:52:27 UTC 2021
 ```
-
+Let's see how pod is going when worker1 goes down. And where does LUN disk create?
