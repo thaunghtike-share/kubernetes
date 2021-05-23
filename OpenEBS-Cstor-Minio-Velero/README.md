@@ -163,6 +163,18 @@ root@kmaster:~# kubectl get cspc -n openebs
 NAME            HEALTHYINSTANCES   PROVISIONEDINSTANCES   DESIREDINSTANCES   AGE
 cstor-storage   4                  4                      4                  8m9s
 ```
+```bash
+kubectl get cspi -n openebs
+```
 
+```bash
+root@kmaster:~# kubectl get cspi -n openebs
+NAME                 HOSTNAME   FREE    CAPACITY      READONLY   PROVISIONEDREPLICAS   HEALTHYREPLICAS   STATUS   AGE
+cstor-storage-drr8   kmaster    1920G   1920000074k   false      0                     0                 ONLINE   9m54s
+cstor-storage-hr48   kworker1   1920G   1920000074k   false      0                     0                 ONLINE   9m53s
+cstor-storage-vq4d   kworker2   1920G   1920000074k   false      0                     0                 ONLINE   9m53s
+cstor-storage-wvdw   kworker3   1920G   1920000074k   false      0                     0                 ONLINE   9m52s
+```
+Once your pool instances have come online, you can proceed with volume provisioning.Create a storageClass to dynamically provision volumes using OpenEBS CSI provisioner. A sample storageClass:
 
 
