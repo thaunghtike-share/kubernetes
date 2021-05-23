@@ -227,3 +227,167 @@ openebs-localpv-provisioner-9f598b455-7pz6f       1/1     Running   0          5
 openebs-provisioner-65749f64fd-hcxr8              1/1     Running   0          53m
 
 ```
+```bash
+kubectl get sc
+```
+Install the MinIO operator deployment. First run krew.
+```bash
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" &&
+  tar zxvf krew.tar.gz &&
+  KREW=./krew-"${OS}_${ARCH}" &&
+  "$KREW" install krew
+)
+```
+```bash
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+```
+Let’s get started by initializing the MinIO operator deployment. This is a one time process.
+
+```bash
+kubectl krew install minio
+kubectl minio init
+kubectl get pods -n minio-operator
+```
+Install the MinIO cluster
+
+A tenant is a MinIO cluster created and managed by the operator. Before creating a tenant, please ensure you have requisite nodes and drives in place. In this guide, we are using 4 Nodes with one 100Gi block device attached per each node. Using the MinIO operator, the following command will generate a YAML file as per the given requirement and the file can be modified as per user specific requirements.
+```bash
+kubectl minio tenant create tenant1 --servers 4 --volumes 4 --capacity 400Gi -o > tenant.yaml
+```
+```yaml
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  creationTimestamp: null
+  name: tenant1
+  namespace: minio-operator
+scheduler:
+  name: ""
+spec:
+  certConfig: {}
+  console:
+    consoleSecret:
+      name: tenant1-console-secret
+    image: minio/console:v0.6.8
+    replicas: 2
+    resources: {}
+  credsSecret:
+    name: tenant1-creds-secret
+  image: minio/minio:RELEASE.2021-04-06T23-11-00Z
+  imagePullSecret: {}
+  mountPath: /export
+  pools:
+  - affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: v1.min.io/tenant
+              operator: In
+              values:
+              - tenant1
+          topologyKey: kubernetes.io/hostname
+    resources: {}
+    servers: 4
+    volumeClaimTemplate:
+      apiVersion: v1
+      kind: persistentvolumeclaims
+      metadata:
+        creationTimestamp: null
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: cstor-csi
+      status: {}
+    volumesPerServer: 1
+  requestAutoCert: false
+status:
+  availableReplicas: 0
+  certificates: {}
+  currentState: ""
+  pools: null
+  revision: 0
+  syncVersion: ""
+
+---
+apiVersion: v1
+data:
+  accesskey: NTRiNmJiZGItZTk0Ny00MjM2LTk5MTktMmEzYWQwN2FiYWVl
+  secretkey: MjNhMGQ4MWYtZTdhNi00N2Q5LTk1ZmYtNGExYmUxMzZmOWVl
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: tenant1-creds-secret
+  namespace: minio-operator
+
+---
+apiVersion: v1
+data:
+  CONSOLE_ACCESS_KEY: YWRtaW4=
+  CONSOLE_PBKDF_PASSPHRASE: ODcwMzk2YTktNTY0MS00MGQyLTg5OWQtN2JlZTFmM2QxODM0
+  CONSOLE_PBKDF_SALT: YmY2ODc0ZDMtNTdmOS00YjhjLTlkZGUtNzNhN2ZjNDI2MzU4
+  CONSOLE_SECRET_KEY: ZWE5YTllY2MtYzZhMy00MDdkLTkwZTktZTc1YzA5NDk5ZTcx
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: tenant1-console-secret
+  namespace: minio-operator
+```
+Apply tenant1.yaml.
+```bash
+$ kubectl apply -f tenant.yaml
+
+tenant.minio.min.io/tenant1 created
+secret/tenant1-creds-secret created
+secret/tenant1-console-secret created
+```
+Verify the MinIO cluster creation is successfully running 
+
+```bash
+root@kmaster:~# kubectl get pods -n minio-operator
+NAME                              READY   STATUS    RESTARTS   AGE
+console-67b748cdc8-lk5hx          1/1     Running   0          16m
+minio-operator-85dc48fc66-dhsn6   1/1     Running   0          16m
+tenant1-ss-0-0                    1/1     Running   0          5m40s
+tenant1-ss-0-1                    1/1     Running   0          5m40s
+tenant1-ss-0-2                    1/1     Running   0          5m40s
+tenant1-ss-0-3                    1/1     Running   0          5m40s
+```
+Verify MinIO service status.
+
+```bash
+root@kmaster:~# kubectl get svc -n minio-operator
+NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+console           ClusterIP   10.100.69.146    <none>        9090/TCP,9443/TCP   18m
+minio             ClusterIP   10.111.119.194   <none>        80/TCP              8m47s
+operator          ClusterIP   10.106.155.72    <none>        4222/TCP,4233/TCP   18m
+tenant1-console   ClusterIP   10.110.238.172   <none>        9090/TCP            25s
+tenant1-hl        ClusterIP   None             <none>        9000/TCP            8m47s
+```
+Expose minio and console service as nodeport type.
+```bash
+kubectl edit svc minio -n minio-operator
+```
+Now, access the MinIO service over the browser using the following way.
+```bash
+http://<node_ip>:<nodeport_ip>
+```
+You should enter the Access key and Secret key to login into the user console. These credentials can be obtained from the secret.
+```bash
+kubectl get secret tenant1-creds-secret -o yaml
+```
+Install latest velero binary and extract it 
+```bash
+wget https://github.com/heptio/velero/releases/download/v1.6.0/velero-v1.6.0-linux-amd64.tar.gz
+tar zxf velero-v1.6.0-linux-amd64.tar.gz
+sudo mv velero-v1.6.0-linux-amd64/velero /usr/local/bin/
+rm -rf velero*
+```
+
