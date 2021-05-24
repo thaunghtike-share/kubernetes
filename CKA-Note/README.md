@@ -74,6 +74,9 @@ Probe ( Liveness and Readiness )
 liveness ဆိုတာ က container healthy ဖြစ်မဖြစ်ကိုစစ်တာ http,tcp,exec 3ခုနဲ့ စစ်လို့ရ liveness ထဲက error မတက်ရင် container က healthy ဖြစ်တယ် error တက်ရင် liveness probe failed error ပြ kubelet က container ကို restart ပြန်လုပ် 
 readiness ဆိုတာက readiness ထဲက http,tcp,exc 3ခုထဲက တစ်ခုနဲ့စစ်လို့ error မတက်ရင် pod status မှာ ready 1/1 2/2 ပြတယ် error ပါရင် pod status မှာ 0/1 0/2 readiness probe failed ဆိုပြတယ် 
 </pre>
+<pre>
+init container နဲ့ container က volume mount တစ်ခုထဲထည့်လို့ရတယ် 
+</pre>
 Cluster Maintainence
 <pre>
 cluster ထဲမှာ node တစ်ခုခု upgrade ဘာညာလုပ်ဖို့ဆို node ကို drain အရင်လုပ်ရတယ် daemonset နဲ့ run ထားတဲ့ app တွေပါနေရင် --ignore-daemonsets flag နဲ့မှရတယ် drain လုပ်ခံရတဲ့ node daemonset က pod တွေက အခြား node မှာ သွား run တယ် drain လုပ် တာနဲ့ cordon လုပ်ပြီးသား unsheduleable node အဖြစ် mark လိုက်တာ Replicaset Daemonset မဟုတ်တဲ့ deployments ရိုးရိုး pods တွေ drain လုပ်မယ့် node မှာရှိနေရင် --ignore-daemonsets --force ထည့်ပေးရတယ် deployment pods တွေကို ကျ terminated လိုက်တယ် daemonset လို အခြား node ကို schedule မလုပ်ဘူး uncordon က schedule ပြန်လုပ်တာ node upgrade ပြီးရင် drain က node ပေါက deployment pods အကုန် delete မှာ ဒါကြောင့် --force ထည့် daemonset replicaset ဆို မဖျက်ဘူး ignore လုပ် pod --> reschedule to another node
