@@ -1,0 +1,10 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-config
+  namespace: nginx-ingress
+data:
+  location-snippets: |
+    add_header 'Access-Control-Allow-Origin' '*';
+  ssl-protocols: "TLSv1.1 TLSv1.2 TLSv1.3"
+
