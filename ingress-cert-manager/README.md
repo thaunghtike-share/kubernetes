@@ -262,6 +262,18 @@ You will see your ssl ingress is working right now.
 ```bash
 curl https://thaunghtikeoo.media -k
 ```
+Reference for haproxy ingress with ssl; https://www.haproxy.com/blog/enable-tls-with-lets-encrypt-and-the-haproxy-kubernetes-ingress-controller/ 
+```bash
+frontend http_front
+  bind *:443
+  stats uri /haproxy?stats
+  default_backend http_back
+
+backend http_back
+  balance roundrobin
+  server worker1  <worker-node1-ip>:<haproxy_ingress_nodeport>
+  server worker2  <worker-node2-ip>:<haproxy_ingress_nodeport>
+  ```
 Thanks
 
 
