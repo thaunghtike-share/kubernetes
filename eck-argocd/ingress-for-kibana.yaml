@@ -10,9 +10,6 @@ spec:
     http:
       paths:
       - path: /
-        pathType: Prefix
         backend:
-          service: 
-            name: quickstart-kb-http
-            port: 
-              number: 5601
+          serviceName: quickstart-kb-http-new
+          servicePort: 5601
