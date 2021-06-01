@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eck-devsa
+  namespace: elastic-system
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: eck.apps-dev.devsa-rnd.frontiir.net
+    http:
+      paths:
+      - backend:
+          serviceName: quickstart-kb-http-new
+          servicePort: 5601
