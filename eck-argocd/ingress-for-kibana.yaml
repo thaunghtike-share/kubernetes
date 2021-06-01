@@ -11,5 +11,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: quickstart-kb-http-new
+          serviceName: quickstart-kb-http
           servicePort: 5601
