@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: eck-devsa
   namespace: elastic-system
-   annotations:
+  annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
