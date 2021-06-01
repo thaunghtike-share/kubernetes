@@ -65,6 +65,6 @@ spec:
     common.k8s.elastic.co/type: elasticsearch
     elasticsearch.k8s.elastic.co/cluster-name: quickstart
   sessionAffinity: None
-  type: NodePort
+  type: LoadBalancer
 status:
   loadBalancer: {}
