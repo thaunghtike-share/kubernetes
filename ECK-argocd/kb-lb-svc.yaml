@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2021-06-01T15:26:34Z"
+  labels:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: quickstart
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:labels:
+          .: {}
+          f:common.k8s.elastic.co/type: {}
+          f:kibana.k8s.elastic.co/name: {}
+        f:ownerReferences:
+          .: {}
+          k:{"uid":"6aac2e76-403c-42b8-a311-d319c86ef401"}:
+            .: {}
+            f:apiVersion: {}
+            f:blockOwnerDeletion: {}
+            f:controller: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+      f:spec:
+        f:ports:
+          .: {}
+          k:{"port":5601,"protocol":"TCP"}:
+            .: {}
+            f:name: {}
+            f:port: {}
+            f:protocol: {}
+            f:targetPort: {}
+        f:selector:
+          .: {}
+          f:common.k8s.elastic.co/type: {}
+          f:kibana.k8s.elastic.co/name: {}
+        f:sessionAffinity: {}
+        f:type: {}
+    manager: elastic-operator
+    operation: Update
+    time: "2021-06-01T15:26:33Z"
+  name: quickstart-kb-http
+  namespace: elastic-system
+  ownerReferences:
+  - apiVersion: kibana.k8s.elastic.co/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Kibana
+    name: quickstart
+    uid: 6aac2e76-403c-42b8-a311-d319c86ef401
+  resourceVersion: "85857487"
+  selfLink: /api/v1/namespaces/elastic-system/services/quickstart-kb-http
+  uid: c101ea12-1b44-4bb8-88c5-24a6d191258d
+spec:
+  clusterIP: 10.152.183.65
+  ports:
+  - name: https
+    port: 5601
+    protocol: TCP
+    targetPort: 5601
+  selector:
+    common.k8s.elastic.co/type: kibana
+    kibana.k8s.elastic.co/name: quickstart
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer: {}
