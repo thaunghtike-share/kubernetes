@@ -13,6 +13,7 @@ spec:
         pathType: Prefix
         backend:
           service: 
+            namespace: elastic-system
             name: quickstart-kb-http-new
             port: 
               number: 5601
