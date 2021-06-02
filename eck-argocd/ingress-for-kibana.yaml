@@ -1,20 +1,21 @@
-
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: es-devsa
+  name: eck-devsa
   namespace: elastic-system
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/app-root: "/"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-body-size: 50m
-    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-    ingress.kubernetes.io/ssl-redirect: "true"
-    ingress.kubernetes.io/proxy-body-size: 50m
-    ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: quickstart-kb-http
+          servicePort: 5601
+    host: kibana.apps-dev.devsa-rnd.frontiir.net
   - http:
       paths:
       - path: /
