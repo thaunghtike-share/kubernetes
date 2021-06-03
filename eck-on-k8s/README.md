@@ -203,6 +203,10 @@ spec:
     count: 1
     config:
       node.store.allow_mmap: false
+    http:
+      tls:
+        selfSignedCertificate:
+          disabled: true 
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -246,6 +250,11 @@ spec:
   count: 1
   elasticsearchRef:
     name: quickstart
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true 
+
 EOF
 ```
 check all instances are ready and running inside elastic-system namespace.
@@ -277,7 +286,7 @@ quickstart-es-http        ClusterIP   10.111.216.114   <none>        9200/TCP   
 quickstart-es-transport   ClusterIP   None             <none>        9300/TCP         12m
 quickstart-kb-http        NodePort    10.101.144.16    <none>        5601:32088/TCP   4m40s
 ```
-browse to https://<nodeip>:<nodeport> with username: elastic and password: 
+browse to http://<nodeip>:<nodeport> with username: elastic and password: 
 ```bash
   kubectl get secret quickstart-es-elastic-user -o=jsonpath='{.data.elastic}' -n elastic-system | base64 --decode; echo
 ```
@@ -459,6 +468,31 @@ metadata:
   labels:
     k8s-app: filebeat
 ---
+```
+setup ingress for kibana
+```yaml
+ apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  name: eck-devsa
+  namespace: elastic-system
+spec:
+  rules:
+  - host: kibana.apps-dev.devsa-rnd.frontiir.net
+    http:
+      paths:
+      - backend:
+          serviceName: quickstart-kb-http
+          servicePort: 5601
+        path: /
+  tls:
+  - hosts:
+    - kibana.apps-dev.devsa-rnd.frontiir.net
+    secretName: frontiir-wildcard-selfsigned-crt-secret
 ```
 go back to kibana dashboard. create index filebeat-* . 
 Thanks!
