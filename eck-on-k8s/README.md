@@ -203,10 +203,6 @@ spec:
     count: 1
     config:
       node.store.allow_mmap: false
-    http:
-      tls:
-        selfSignedCertificate:
-          disabled: true 
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
