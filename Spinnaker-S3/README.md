@@ -179,6 +179,9 @@ hal deploy apply
 kubectl get svc -n spinnaker
 ```
 Browse http://10.0.0.7:32059 ## spin-deck service
+```bash
+Demo: https://thenewstack.io/build-extensible-ci-cd-pipelines-spinnaker-kubernetes/
+```
 
 
 
