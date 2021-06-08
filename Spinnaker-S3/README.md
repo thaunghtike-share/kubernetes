@@ -186,7 +186,7 @@ Demo: https://thenewstack.io/build-extensible-ci-cd-pipelines-spinnaker-kubernet
 You can setup Automatic Triggers: To use Docker Hub Triggers , You have to install docker registry in spinnaker . Reference to Official docs under step2 ( select cloud providers: docker reg)
 ```
 example 
-``bash
+```bash
 pipeline1: stage1: deploy an simple app -- ( auto trigers --> docker hub ) -- new image build --> pipeline build
 pipeline2: stage1: manual judgement ( auto triggers --> pipeline1 success ) Choose Continue or Stop --> If Continue
 pipeline2: stage2: delete manifest ( manifest --> simpel app )
