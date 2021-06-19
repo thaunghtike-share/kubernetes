@@ -76,5 +76,8 @@ kubernetes                 ClusterIP      10.0.0.1       <none>           443/TC
  helm install keycloak-db bitnami/postgresql-ha
  kubectl create -f keycloak.yaml
 ```
-
+* keycloak youtube playlist
+```bash
+https://www.youtube.com/watch?v=g8LVIr8KKSA&list=PLPZal7ksxNs0mgScrJxrggEayV-TPZ9sA
+```
 
