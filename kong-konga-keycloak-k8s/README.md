@@ -67,6 +67,14 @@ kong-postgresql-headless   ClusterIP      None           <none>           5432/T
 konga                      LoadBalancer   10.0.18.158    20.75.118.177    80:30273/TCP                    8m11s
 kubernetes                 ClusterIP      10.0.0.1       <none>           443/TCP                         54m
 ```
+* make sure postgress connect to kong.
+```bash
+psql --host 10.0.179.127 -U kong -p 5432 
+password - postgres
+/l
+/c kong
+/dt
+```
 * browe http://20.75.118.177 . Sing up and login . Create a new connection with name ( kong-kong-admin ) and url ( http://kong-kong-admin:8001 )
 
 * Let’s start with creating the Keycloak deployment and service: If postgres not running: check pvc and pull helm chart to change postgres pod's mountPath -->/bitnami/
