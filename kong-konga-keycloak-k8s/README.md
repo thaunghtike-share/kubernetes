@@ -77,7 +77,7 @@ password - postgres
 ```
 * browe http://20.75.118.177 . Sing up and login . Create a new connection with name ( kong-kong-admin ) and url ( http://kong-kong-admin:8001 )
 
-* Let’s start with creating the Keycloak deployment and service: If postgres not running: check pvc and pull helm chart to change postgres pod's mountPath -->/bitnami/
+* Let’s start with creating the Keycloak deployment and service: If postgres not running: check pvc . recreate  new pvc and if you get crashloopbackoff --> change mountPath
 ```bash
  helm repo add bitnami https://charts.bitnami.com/bitnami
  helm repo update
