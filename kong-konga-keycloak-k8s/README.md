@@ -19,7 +19,7 @@ cd kong/charts/postgresql/
 vim values.yaml --> change mountPath (from /bitnami/bostgresql to /bitnami )
 cd
 kubectl create ns kong
-helm -n kong install kong ./kong/ --set admin.enabled=true --set admin.http.enabled=true --set postgresql.enabled=true   --set postgresql.postgresqlUsername=kong  --set postgresql.postgresqlDatabase=kong --set env.database=postgres
+helm -n kong install kong ./kong/ --set admin.enabled=true --set admin.http.enabled=true --set postgresql.enabled=true   --set postgresql.postgresqlUsername=kong  --set postgresql.postgresqlDatabase=kong --set env.database=postgres --set postgresql.postgresqlPassword=postgres
 ```
 * Check kong & postgre pod are running. You will see Postgres pod is pending. Because pvc is also pending. So, you have to create a new pv and pvc for postgre pod.
 ```bash
