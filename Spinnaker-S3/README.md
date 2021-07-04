@@ -125,7 +125,7 @@ hal config storage edit --type s3
 * list available version and set version you want to use
 ```bash
 hal version list
-hal config version edit --version 1.26.3
+hal config version edit --version 1.26.6
 ```
 * deploy spinnaker 
 ```bash
