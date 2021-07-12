@@ -492,7 +492,7 @@ source <(velero completion bash)
 Next step is to testing backup and restore. To bakup a single namespace.
 ```bash
 kubectl create ns testing
-kubectl deploy nginx --image nginx -n testing
+kubectl create deploy nginx --image nginx -n testing
 velero backup create nginxbackup --include-namespaces testing
 ```
 check backups list in kubernetes.
