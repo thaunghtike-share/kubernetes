@@ -155,7 +155,7 @@ kubectl apply -f cspc.yml
 </pre>
 Check if the pool instances report their status as 'ONLINE'.
 ```bash
-kubectl get cscp -n openebs
+kubectl get cspc -n openebs
 ```
 
 ```bash
